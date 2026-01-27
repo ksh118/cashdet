@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캐시뎃 | 내 정보</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .row { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .log-item { font-size: 14px; padding: 10px; border-bottom: 1px solid #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h2>나의 정보</h2>
+    <div class="row">
+        <b>현재 보유 캐시</b>
+        <span id="my-cash" style="font-size:24px; font-weight:bold; color:#0052D4;">0 c</span>
+    </div>
+    
+    <div id="log-section" style="margin-top:20px;">
+        <h4>적립 내역</h4>
+        <div id="log-list"></div>
+    </div>
+
+    <div style="margin-top:40px;">
+        <h4>설정</h4>
+        <input type="text" id="new-nick" placeholder="변경할 닉네임" style="padding:10px; width:70%;">
+        <button onclick="updateNick()" style="padding:10px;">변경</button>
+        <br><br>
+        <button onclick="supabase.auth.signOut().then(()=>location.href='index.html')" style="color:red; background:none; border:none; cursor:pointer;">로그아웃</button>
+    </div>
+
+    <script>
+        const client = supabase.createClient('URL', 'KEY');
+        
+        async function loadMe() {
+            const { data: { session } } = await client.auth.getSession();
+            if(!session) return location.href='index.html';
+
+            const { data: profile } = await client.from('profiles').select('*').eq('id', session.user.id).single();
+            document.getElementById('my-cash').innerText = profile.cash.toLocaleString() + ' c';
+
+            const { data: logs } = await client.from('logs').select('*').eq('user_id', session.user.id).order('created_at', {ascending:false});
+            const list = document.getElementById('log-list');
+            logs.forEach(l => {
+                list.innerHTML += `<div class="log-item">${l.msg} : +${l.amount}c <br> <small>${new Date(l.created_at).toLocaleString()}</small></div>`;
+            });
+            // 알림 읽음 처리
+            await client.from('logs').update({ is_read: true }).eq('user_id', session.user.id);
+        }
+
+        async function updateNick() {
+            const { data: { session } } = await client.auth.getSession();
+            const nick = document.getElementById('new-nick').value;
+            await client.from('profiles').update({ nickname: nick }).eq('id', session.user.id);
+            alert("변경되었습니다.");
+            location.reload();
+        }
+        loadMe();
+    </script>
+</body>
+</html>
