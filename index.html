@@ -7,66 +7,60 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #0052D4; --bg: #F8F9FA; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); padding-bottom: 80px; }
-        /* 로그인 화면 */
-        .auth-overlay { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        .auth-overlay input { width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; }
-        .auth-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); padding-bottom: 80px; }
         
-        /* 헤더 및 상단 */
+        /* 헤더 & 캐시 */
         .header { background: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); }
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); cursor: pointer; }
         .noti-btn { position: relative; font-size: 24px; cursor: pointer; }
         .dot { position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: red; border-radius: 50%; display: none; }
         
-        .cash-section { background: white; padding: 0 20px 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .cash-label { font-size: 14px; color: #666; }
+        .cash-section { background: white; padding: 0 20px 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .cash-val { font-size: 32px; font-weight: 800; margin-top: 5px; }
 
-        /* 사진 배너 수정 */
-        .banner-container { width: 90%; margin: 20px auto; height: 180px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .banner-container img { width: 100%; height: 100%; object-fit: cover; }
+        /* 사진 배너 */
+        .banner-box { width: 90%; margin: 20px auto; height: 180px; border-radius: 20px; overflow: hidden; background: #ddd; }
+        .banner-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .section-title { padding: 20px; font-size: 18px; font-weight: bold; }
-        .ad-list { padding: 0 20px; }
-        .ad-card { background: white; padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; }
-        .ad-card.done { opacity: 0.6; background: #eee; cursor: default; }
-        
-        .full-btn { width: 90%; margin: 10px auto; display: block; padding: 15px; border-radius: 12px; border: none; background: #E9ECEF; font-weight: bold; cursor: pointer; }
-        
-        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; font-size: 12px; color: #666; }
-        .hidden { display: none !important; }
+        /* 미션 리스트 */
+        .ad-card { background: white; padding: 18px; border-radius: 16px; margin: 0 20px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; }
+        .ad-card.done { background: #eee; color: #aaa; cursor: default; }
+
+        /* 알림 팝업 박스 */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 85%; max-width: 400px; border-radius: 20px; padding: 25px; max-height: 60vh; overflow-y: auto; }
+        .log-item { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .log-time { font-size: 11px; color: #999; margin-top: 4px; }
+
+        /* 하단 바 */
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
+        .nav div { text-align: center; font-size: 12px; color: #666; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="auth-ui" class="auth-overlay hidden">
-    <h1 class="logo" style="font-size: 40px;">codetbase</h1>
-    <p>지금 가입하고 캐시를 적립하세요!</p><br>
-    <input type="email" id="email" placeholder="이메일 주소">
-    <input type="password" id="pw" placeholder="비밀번호">
-    <button class="auth-btn" onclick="handleLogin()">시작하기</button>
+<div class="header">
+    <div class="logo" onclick="location.href='index.html'">codetbase</div>
+    <div class="noti-btn" onclick="openNoti()">🔔<div id="dot" class="dot"></div></div>
 </div>
 
-<div id="main-content">
-    <div class="header">
-        <div class="logo">codetbase</div>
-        <div class="noti-btn" onclick="location.href='me.html'">🔔<div id="dot" class="dot"></div></div>
-    </div>
+<div class="cash-section">
+    <div style="font-size:14px; color:#666;" onclick="location.href='me.html'"><span id="nick">사용자</span> 님의 캐시 ></div>
+    <div class="cash-val" id="cash">0 c</div>
+</div>
 
-    <div class="cash-section">
-        <div class="cash-label" onclick="location.href='me.html'"><span id="nick">사용자</span> 님의 보유 캐시 ></div>
-        <div class="cash-val" id="cash">0 c</div>
-    </div>
+<div class="banner-box" id="banner"><img id="b-img" src=""></div>
 
-    <div class="banner-container" id="banner-box">
-        <img id="banner-img" src="https://via.placeholder.com/400x180?text=codetbase+Loading..." alt="banner">
-    </div>
+<h3 style="padding:0 20px;">오늘의 미션</h3>
+<div id="ad-list"></div>
+<button onclick="location.href='m.html'" style="width:90%; margin:10px auto; display:block; padding:15px; border:none; border-radius:12px; background:#eee; font-weight:bold;">미션 전체 보기</button>
 
-    <div class="section-title">오늘의 미션</div>
-    <div class="ad-list" id="ad-list"></div>
-    
-    <button class="full-btn" onclick="location.href='m.html'">미션 전체 보기</button>
+<div id="noti-modal" class="modal" onclick="closeNoti(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0">적립 알림</h3>
+        <div id="noti-list"></div>
+        <button onclick="closeNoti()" style="width:100%; margin-top:15px; padding:10px; border:none; background:#f0f0f0; border-radius:10px;">닫기</button>
+    </div>
 </div>
 
 <div class="nav">
@@ -80,62 +74,55 @@
 
     async function init() {
         const { data: { session } } = await client.auth.getSession();
-        if (!session) {
-            document.getElementById('auth-ui').classList.remove('hidden');
-            document.getElementById('main-content').classList.add('hidden');
-            return;
-        }
-        loadPageData(session.user);
-    }
+        if (!session) { alert("로그인이 필요합니다."); location.href='login.html'; return; }
+        
+        const { data: p } = await client.from('profiles').select('*').eq('id', session.user.id).single();
+        document.getElementById('nick').innerText = p.nickname || '회원';
+        document.getElementById('cash').innerText = p.cash.toLocaleString() + ' c';
 
-    async function loadPageData(user) {
-        // 유저 정보
-        const { data: prof } = await client.from('profiles').select('*').eq('id', user.id).single();
-        document.getElementById('nick').innerText = prof.nickname || '회원';
-        document.getElementById('cash').innerText = prof.cash.toLocaleString() + ' c';
+        // 최신 광고 배너
+        const { data: ads } = await client.from('ads').select('*').order('created_at', {ascending:false});
+        if(ads[0]?.image_url) document.getElementById('b-img').src = ads[0].image_url;
 
-        // 알림 점
-        const { count } = await client.from('logs').select('*', {count:'exact'}).eq('user_id', user.id).eq('is_read', false);
+        // 알림 점 표시
+        const { count } = await client.from('logs').select('*', {count:'exact'}).eq('user_id', session.user.id).eq('is_read', false);
         if(count > 0) document.getElementById('dot').style.display = 'block';
 
-        // 광고 및 배너 (최신 광고 이미지를 배너로 활용)
-        const { data: ads } = await client.from('ads').select('*').order('created_at', {ascending:false});
-        if(ads[0]?.image_url) document.getElementById('banner-img').src = ads[0].image_url;
-
-        const { data: myLogs } = await client.from('logs').select('ad_id').eq('user_id', user.id);
+        // 광고 리스트
+        const { data: myLogs } = await client.from('logs').select('ad_id').eq('user_id', session.user.id);
         const doneIds = myLogs.map(l => l.ad_id);
-
         const list = document.getElementById('ad-list');
-        ads.slice(0, 3).forEach(ad => { // 홈에는 3개만 노출
+        ads.slice(0, 3).forEach(ad => {
             const done = doneIds.includes(ad.id);
-            list.innerHTML += `
-                <div class="ad-card ${done ? 'done' : ''}" onclick="${done ? '' : `startMission('${ad.id}', '${ad.link_url}', ${ad.reward_cash})`}">
-                    <span>${ad.title}</span>
-                    <b style="color:var(--primary)">+${ad.reward_cash}c</b>
-                </div>`;
+            list.innerHTML += `<div class="ad-card ${done?'done':''}" onclick="${done?'':`go('${ad.id}','${ad.link_url}',${ad.reward_cash})`}">
+                <span>${ad.title}</span><b>+${ad.reward_cash}c</b></div>`;
         });
     }
 
-    function startMission(id, url, amt) {
-        alert("10초간 광고를 시청해야 적립됩니다!");
-        window.open(url, '_blank');
-        setTimeout(async () => {
-            const { data: { session } } = await client.auth.getSession();
-            await client.rpc('add_cash', { user_id: session.user.id, amount: amt, ad_id: id, msg: '미션 완료 적립' });
-            alert("적립 완료!");
-            location.reload();
-        }, 10000);
+    async function openNoti() {
+        const { data: { session } } = await client.auth.getSession();
+        const { data: logs } = await client.from('logs').select('*').eq('user_id', session.user.id).order('created_at', {ascending:false});
+        const list = document.getElementById('noti-list');
+        list.innerHTML = logs.length ? '' : '알림이 없습니다.';
+        logs.forEach(l => {
+            list.innerHTML += `<div class="log-item"><b>${l.msg}</b> <span style="color:blue; float:right;">+${l.amount}</span>
+                <div class="log-time">${new Date(l.created_at).toLocaleString()}</div></div>`;
+        });
+        document.getElementById('noti-modal').style.display = 'flex';
+        await client.from('logs').update({ is_read: true }).eq('user_id', session.user.id);
+        document.getElementById('dot').style.display = 'none';
     }
 
-    async function handleLogin() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('pw').value;
-        const { error } = await client.auth.signInWithPassword({ email, password });
-        if(error) {
-            const { error: sErr } = await client.auth.signUp({ email, password });
-            if(sErr) alert("오류: " + sErr.message);
-            else alert("인증 메일을 확인해 주세요!");
-        } else location.reload();
+    function closeNoti() { document.getElementById('noti-modal').style.display = 'none'; }
+    function go(id, url, amt) {
+        if(confirm("10초간 머물러야 적립됩니다. 이동할까요?")) {
+            window.open(url, '_blank');
+            setTimeout(async () => {
+                const { data: { session } } = await client.auth.getSession();
+                await client.rpc('add_cash', { user_id: session.user.id, amount: amt, ad_id: id, msg: '미션 완료 적립' });
+                alert("적립 완료!"); location.reload();
+            }, 10000);
+        }
     }
     init();
 </script>
