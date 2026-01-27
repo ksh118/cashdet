@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>캐시뎃 어드민</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="padding:40px; font-family:sans-serif;">
+    <h2>💎 캐시뎃 광고 관리자</h2>
+    <div style="max-width:400px; display:flex; flex-direction:column; gap:10px;">
+        <input type="text" id="t" placeholder="광고 제목">
+        <input type="number" id="c" placeholder="적립 캐시 금액">
+        <input type="text" id="l" placeholder="광고 이동 링크 URL">
+        <input type="text" id="i" placeholder="사진 배너 URL (이미지 주소)">
+        <button onclick="addAd()" style="padding:15px; background:#000; color:#fff; border-radius:10px; cursor:pointer;">광고 게시하기</button>
+    </div>
+
+    <script>
+        const client = supabase.createClient('URL', 'KEY');
+        async function addAd() {
+            const { error } = await client.from('ads').insert([{
+                title: document.getElementById('t').value,
+                reward_cash: document.getElementById('c').value,
+                link_url: document.getElementById('l').value,
+                image_url: document.getElementById('i').value
+            }]);
+            if(error) alert(error.message); else { alert("게시 완료!"); location.reload(); }
+        }
+    </script>
+</body>
+</html>
