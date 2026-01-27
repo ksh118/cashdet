@@ -3,45 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>codetbase | 마이페이지</title>
+    <title>codetbase | 내 정보</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; font-family: sans-serif; background: #f4f7ff; }
-        .top-card { background: #0052D4; color: white; padding: 40px 25px; border-radius: 0 0 40px 40px; }
-        .user-row { display: flex; justify-content: space-between; align-items: center; }
-        .cash-big { font-size: 40px; font-weight: 800; margin: 15px 0; }
-        
-        .content { padding: 20px; margin-top: -20px; }
-        .white-box { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .menu-item { padding: 15px 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; color: #444; }
-        .log-item { padding: 12px 0; font-size: 14px; border-bottom: 1px solid #f9f9f9; }
-        .logout-btn { color: #ff4d4d; text-align: center; width: 100%; margin-top: 20px; border: none; background: none; cursor: pointer; }
+        .top { background: #0052D4; color: white; padding: 40px 20px; border-radius: 0 0 30px 30px; text-align: center; }
+        .card { background: white; margin: -20px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .menu { padding: 15px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        input { padding: 8px; border: 1px solid #ddd; border-radius: 8px; width: 60%; }
+        button { padding: 8px 15px; background: #0052D4; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-<div class="top-card">
-    <div class="user-row">
-        <span style="font-size: 20px; font-weight: bold;" id="my-nick">회원님</span>
-        <button onclick="location.href='index.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 12px; border-radius:10px;">홈으로</button>
-    </div>
-    <div class="cash-big" id="my-cash">0 c</div>
-    <div style="opacity: 0.8;">오늘도 알뜰한 하루 되세요!</div>
+<div class="top">
+    <h2 id="m-nick" style="margin:0">회원님</h2>
+    <div id="m-cash" style="font-size:36px; font-weight:bold; margin-top:10px;">0 c</div>
 </div>
 
-<div class="content">
-    <div class="white-box">
-        <h3 style="margin-top:0">적립 내역</h3>
-        <div id="log-list"></div>
+<div class="card">
+    <h3>계정 설정</h3>
+    <div class="menu">
+        <span>닉네임</span>
+        <div>
+            <input type="text" id="new-nick">
+            <button onclick="saveNick()">변경</button>
+        </div>
     </div>
-
-    <div class="white-box">
-        <h3>계정 설정</h3>
-        <div class="menu-item"><span>닉네임 수정</span> <input type="text" id="new-nick" style="border:1px solid #ddd; border-radius:5px; padding:5px;"></div>
-        <button onclick="updateNick()" style="width:100%; margin-top:10px; padding:10px; background:#0052D4; color:white; border:none; border-radius:10px;">저장하기</button>
+    <div class="menu" style="border:none;">
+        <span>로그아웃</span>
+        <span onclick="logout()" style="color:red; cursor:pointer;">Logout →</span>
     </div>
+</div>
 
-    <button class="logout-btn" onclick="logout()">로그아웃</button>
+<div class="nav">
+    <div onclick="location.href='index.html'">🏠<br>홈</div>
+    <div onclick="location.href='m.html'">💰<br>미션</div>
+    <div onclick="location.href='me.html'">👤<br>내정보</div>
 </div>
 
 <script>
@@ -50,34 +49,19 @@
     async function load() {
         const { data: { session } } = await client.auth.getSession();
         if(!session) return location.href='index.html';
-
-        // 데이터 로드
         const { data: p } = await client.from('profiles').select('*').eq('id', session.user.id).single();
-        document.getElementById('my-nick').innerText = p.nickname || '회원님';
-        document.getElementById('my-cash').innerText = p.cash.toLocaleString() + ' c';
-
-        // 로그 및 알림 읽음처리
-        const { data: logs } = await client.from('logs').select('*').eq('user_id', session.user.id).order('created_at', {ascending:false});
-        const list = document.getElementById('log-list');
-        logs.forEach(l => {
-            list.innerHTML += `<div class="log-item"><b>${l.msg}</b><br><small style="color:#999">${new Date(l.created_at).toLocaleDateString()}</small> <span style="float:right; color:#0052D4">+${l.amount}</span></div>`;
-        });
-        
-        await client.from('logs').update({ is_read: true }).eq('user_id', session.user.id);
+        document.getElementById('m-nick').innerText = p.nickname || '회원님';
+        document.getElementById('m-cash').innerText = p.cash.toLocaleString() + ' c';
     }
 
-    async function updateNick() {
+    async function saveNick() {
         const { data: { session } } = await client.auth.getSession();
         const nick = document.getElementById('new-nick').value;
         await client.from('profiles').update({ nickname: nick }).eq('id', session.user.id);
-        alert("닉네임이 변경되었습니다.");
-        location.reload();
+        alert("저장되었습니다."); location.reload();
     }
 
-    async function logout() {
-        await client.auth.signOut();
-        location.href = 'index.html';
-    }
+    async function logout() { await client.auth.signOut(); location.href='index.html'; }
     load();
 </script>
 </body>
