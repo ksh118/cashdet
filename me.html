@@ -3,61 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>캐시뎃 | 내 정보</title>
+    <title>codetbase | 마이페이지</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .row { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .log-item { font-size: 14px; padding: 10px; border-bottom: 1px solid #f9f9f9; }
+        body { margin: 0; font-family: sans-serif; background: #f4f7ff; }
+        .top-card { background: #0052D4; color: white; padding: 40px 25px; border-radius: 0 0 40px 40px; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; }
+        .cash-big { font-size: 40px; font-weight: 800; margin: 15px 0; }
+        
+        .content { padding: 20px; margin-top: -20px; }
+        .white-box { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .menu-item { padding: 15px 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; color: #444; }
+        .log-item { padding: 12px 0; font-size: 14px; border-bottom: 1px solid #f9f9f9; }
+        .logout-btn { color: #ff4d4d; text-align: center; width: 100%; margin-top: 20px; border: none; background: none; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h2>나의 정보</h2>
-    <div class="row">
-        <b>현재 보유 캐시</b>
-        <span id="my-cash" style="font-size:24px; font-weight:bold; color:#0052D4;">0 c</span>
+
+<div class="top-card">
+    <div class="user-row">
+        <span style="font-size: 20px; font-weight: bold;" id="my-nick">회원님</span>
+        <button onclick="location.href='index.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 12px; border-radius:10px;">홈으로</button>
     </div>
-    
-    <div id="log-section" style="margin-top:20px;">
-        <h4>적립 내역</h4>
+    <div class="cash-big" id="my-cash">0 c</div>
+    <div style="opacity: 0.8;">오늘도 알뜰한 하루 되세요!</div>
+</div>
+
+<div class="content">
+    <div class="white-box">
+        <h3 style="margin-top:0">적립 내역</h3>
         <div id="log-list"></div>
     </div>
 
-    <div style="margin-top:40px;">
-        <h4>설정</h4>
-        <input type="text" id="new-nick" placeholder="변경할 닉네임" style="padding:10px; width:70%;">
-        <button onclick="updateNick()" style="padding:10px;">변경</button>
-        <br><br>
-        <button onclick="supabase.auth.signOut().then(()=>location.href='index.html')" style="color:red; background:none; border:none; cursor:pointer;">로그아웃</button>
+    <div class="white-box">
+        <h3>계정 설정</h3>
+        <div class="menu-item"><span>닉네임 수정</span> <input type="text" id="new-nick" style="border:1px solid #ddd; border-radius:5px; padding:5px;"></div>
+        <button onclick="updateNick()" style="width:100%; margin-top:10px; padding:10px; background:#0052D4; color:white; border:none; border-radius:10px;">저장하기</button>
     </div>
 
-    <script>
-        const client = supabase.createClient('URL', 'KEY');
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
+</div>
+
+<script>
+    const client = supabase.createClient('URL', 'KEY');
+
+    async function load() {
+        const { data: { session } } = await client.auth.getSession();
+        if(!session) return location.href='index.html';
+
+        // 데이터 로드
+        const { data: p } = await client.from('profiles').select('*').eq('id', session.user.id).single();
+        document.getElementById('my-nick').innerText = p.nickname || '회원님';
+        document.getElementById('my-cash').innerText = p.cash.toLocaleString() + ' c';
+
+        // 로그 및 알림 읽음처리
+        const { data: logs } = await client.from('logs').select('*').eq('user_id', session.user.id).order('created_at', {ascending:false});
+        const list = document.getElementById('log-list');
+        logs.forEach(l => {
+            list.innerHTML += `<div class="log-item"><b>${l.msg}</b><br><small style="color:#999">${new Date(l.created_at).toLocaleDateString()}</small> <span style="float:right; color:#0052D4">+${l.amount}</span></div>`;
+        });
         
-        async function loadMe() {
-            const { data: { session } } = await client.auth.getSession();
-            if(!session) return location.href='index.html';
+        await client.from('logs').update({ is_read: true }).eq('user_id', session.user.id);
+    }
 
-            const { data: profile } = await client.from('profiles').select('*').eq('id', session.user.id).single();
-            document.getElementById('my-cash').innerText = profile.cash.toLocaleString() + ' c';
+    async function updateNick() {
+        const { data: { session } } = await client.auth.getSession();
+        const nick = document.getElementById('new-nick').value;
+        await client.from('profiles').update({ nickname: nick }).eq('id', session.user.id);
+        alert("닉네임이 변경되었습니다.");
+        location.reload();
+    }
 
-            const { data: logs } = await client.from('logs').select('*').eq('user_id', session.user.id).order('created_at', {ascending:false});
-            const list = document.getElementById('log-list');
-            logs.forEach(l => {
-                list.innerHTML += `<div class="log-item">${l.msg} : +${l.amount}c <br> <small>${new Date(l.created_at).toLocaleString()}</small></div>`;
-            });
-            // 알림 읽음 처리
-            await client.from('logs').update({ is_read: true }).eq('user_id', session.user.id);
-        }
-
-        async function updateNick() {
-            const { data: { session } } = await client.auth.getSession();
-            const nick = document.getElementById('new-nick').value;
-            await client.from('profiles').update({ nickname: nick }).eq('id', session.user.id);
-            alert("변경되었습니다.");
-            location.reload();
-        }
-        loadMe();
-    </script>
+    async function logout() {
+        await client.auth.signOut();
+        location.href = 'index.html';
+    }
+    load();
+</script>
 </body>
 </html>
