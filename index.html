@@ -3,127 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="adpick-auth" content="여기에_애드픽_인증코드">
-    <title>cashdet | 홈</title>
+    <title>codetbase | 홈</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #0052D4; --gray: #888; }
-        body { margin: 0; font-family: sans-serif; background: #fff; padding-bottom: 80px; }
-        .header { padding: 20px; position: relative; }
-        .logo { font-size: 28px; font-weight: 900; }
-        .user-info { margin-top: 10px; cursor: pointer; }
-        .cash-val { font-size: 36px; font-weight: 900; margin: 5px 0; }
-        .noti-icon { position: absolute; top: 25px; right: 25px; font-size: 24px; cursor: pointer; }
-        .noti-dot { position: absolute; top: 0; right: 0; width: 10px; height: 10px; background: red; border-radius: 50%; display: none; }
-        .banner { width: 90%; height: 160px; background: #ccc; margin: 15px auto; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; position: relative; }
-        .banner-idx { position: absolute; bottom: 10px; right: 20px; font-size: 14px; }
-        .mission-box { padding: 0 20px; }
-        .ad-card { background: #888; padding: 20px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .ad-card.done { background: #eee; color: #aaa; cursor: default; }
-        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #f0f0f0; display: flex; justify-content: space-around; align-items: center; font-weight: bold; border-top: 1px solid #ddd; }
-        .auth-overlay { position: fixed; inset: 0; background: white; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
-        .hidden { display: none; }
+        :root { --primary: #0052D4; --bg: #F8F9FA; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); padding-bottom: 80px; }
+        /* 로그인 화면 */
+        .auth-overlay { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .auth-overlay input { width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 12px; }
+        .auth-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; }
+        
+        /* 헤더 및 상단 */
+        .header { background: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); }
+        .noti-btn { position: relative; font-size: 24px; cursor: pointer; }
+        .dot { position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: red; border-radius: 50%; display: none; }
+        
+        .cash-section { background: white; padding: 0 20px 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .cash-label { font-size: 14px; color: #666; }
+        .cash-val { font-size: 32px; font-weight: 800; margin-top: 5px; }
+
+        /* 사진 배너 수정 */
+        .banner-container { width: 90%; margin: 20px auto; height: 180px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .banner-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .section-title { padding: 20px; font-size: 18px; font-weight: bold; }
+        .ad-list { padding: 0 20px; }
+        .ad-card { background: white; padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; }
+        .ad-card.done { opacity: 0.6; background: #eee; cursor: default; }
+        
+        .full-btn { width: 90%; margin: 10px auto; display: block; padding: 15px; border-radius: 12px; border: none; background: #E9ECEF; font-weight: bold; cursor: pointer; }
+        
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div id="auth-ui" class="auth-overlay hidden">
-    <h1 style="color:var(--primary)">cashdet</h1>
-    <p>보상형 재테크의 시작</p>
-    <input type="email" id="email" placeholder="이메일" style="width:100%; padding:12px; margin-bottom:10px;">
-    <input type="password" id="pw" placeholder="비밀번호" style="width:100%; padding:12px; margin-bottom:10px;">
-    <button onclick="handleLogin()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px;">로그인 / 회원가입</button>
+    <h1 class="logo" style="font-size: 40px;">codetbase</h1>
+    <p>지금 가입하고 캐시를 적립하세요!</p><br>
+    <input type="email" id="email" placeholder="이메일 주소">
+    <input type="password" id="pw" placeholder="비밀번호">
+    <button class="auth-btn" onclick="handleLogin()">시작하기</button>
 </div>
 
-<div class="header">
-    <div class="logo">cashdet</div>
-    <div class="noti-icon" onclick="location.href='me.html'">🔔<div id="dot" class="noti-dot"></div></div>
-    <div class="user-info" onclick="location.href='me.html'"><span id="nick">닉네임</span> 님의 보유 캐시 ></div>
-    <div class="cash-val" id="cash">0 c</div>
-</div>
-
-<div class="banner" id="top-banner">사진 배너 <span class="banner-idx">1/2</span></div>
-
-<div class="mission-box">
-    <h3>미션</h3>
-    <div id="ad-list"></div>
-    
-    <div style="margin:20px 0; border-radius:15px; overflow:hidden;">
-        <iframe src="https://adpick.co.kr/nativeAD/ad.php?bannerType=type1&limit=1&affid=e1f79a&frameId=AdpickAdFrame_2026127%40234910&popup=false" width="100%" frameborder="0" scrolling="no" data-adpick_nativeAD id="AdpickAdFrame_2026127@234910" referrerpolicy="unsafe-url"></iframe>
+<div id="main-content">
+    <div class="header">
+        <div class="logo">codetbase</div>
+        <div class="noti-btn" onclick="location.href='me.html'">🔔<div id="dot" class="dot"></div></div>
     </div>
+
+    <div class="cash-section">
+        <div class="cash-label" onclick="location.href='me.html'"><span id="nick">사용자</span> 님의 보유 캐시 ></div>
+        <div class="cash-val" id="cash">0 c</div>
+    </div>
+
+    <div class="banner-container" id="banner-box">
+        <img id="banner-img" src="https://via.placeholder.com/400x180?text=codetbase+Loading..." alt="banner">
+    </div>
+
+    <div class="section-title">오늘의 미션</div>
+    <div class="ad-list" id="ad-list"></div>
     
-    <button style="width:100%; padding:15px; border-radius:15px; border:none; background:#888; font-weight:bold;">미션 전체 보기</button>
+    <button class="full-btn" onclick="location.href='m.html'">미션 전체 보기</button>
 </div>
 
 <div class="nav">
-    <div onclick="location.href='index.html'">홈</div>
-    <div>미션</div>
-    <div>쿠폰</div>
-    <div>구매</div>
-    <div onclick="location.href='me.html'">나의 정보</div>
+    <div onclick="location.href='index.html'">🏠<br>홈</div>
+    <div onclick="location.href='m.html'">💰<br>미션</div>
+    <div onclick="location.href='me.html'">👤<br>내정보</div>
 </div>
 
 <script>
     const client = supabase.createClient('URL', 'KEY');
 
-    async function checkAuth() {
+    async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) {
             document.getElementById('auth-ui').classList.remove('hidden');
-        } else {
-            loadData(session.user);
+            document.getElementById('main-content').classList.add('hidden');
+            return;
         }
+        loadPageData(session.user);
     }
 
-    async function loadData(user) {
-        // 프로필 및 캐시 로드
-        let { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
-        document.getElementById('nick').innerText = profile.nickname || '회원';
-        document.getElementById('cash').innerText = profile.cash.toLocaleString() + ' c';
+    async function loadPageData(user) {
+        // 유저 정보
+        const { data: prof } = await client.from('profiles').select('*').eq('id', user.id).single();
+        document.getElementById('nick').innerText = prof.nickname || '회원';
+        document.getElementById('cash').innerText = prof.cash.toLocaleString() + ' c';
 
-        // 알림 체크
-        const { count } = await client.from('logs').select('*', { count: 'exact' }).eq('user_id', user.id).eq('is_read', false);
+        // 알림 점
+        const { count } = await client.from('logs').select('*', {count:'exact'}).eq('user_id', user.id).eq('is_read', false);
         if(count > 0) document.getElementById('dot').style.display = 'block';
 
-        // 광고 리스트 (최신순)
-        const { data: ads } = await client.from('ads').select('*').order('created_at', { ascending: false });
+        // 광고 및 배너 (최신 광고 이미지를 배너로 활용)
+        const { data: ads } = await client.from('ads').select('*').order('created_at', {ascending:false});
+        if(ads[0]?.image_url) document.getElementById('banner-img').src = ads[0].image_url;
+
         const { data: myLogs } = await client.from('logs').select('ad_id').eq('user_id', user.id);
-        const doneAds = myLogs.map(l => l.ad_id);
+        const doneIds = myLogs.map(l => l.ad_id);
 
         const list = document.getElementById('ad-list');
-        ads.forEach(ad => {
-            const isDone = doneAds.includes(ad.id);
-            const div = document.createElement('div');
-            div.className = `ad-card ${isDone ? 'done' : ''}`;
-            div.innerHTML = `<div>${isDone ? '[완료] ' : ''}${ad.title}</div><div>${ad.reward_cash}c</div>`;
-            if(!isDone) div.onclick = () => startMission(ad, user.id);
-            list.appendChild(div);
+        ads.slice(0, 3).forEach(ad => { // 홈에는 3개만 노출
+            const done = doneIds.includes(ad.id);
+            list.innerHTML += `
+                <div class="ad-card ${done ? 'done' : ''}" onclick="${done ? '' : `startMission('${ad.id}', '${ad.link_url}', ${ad.reward_cash})`}">
+                    <span>${ad.title}</span>
+                    <b style="color:var(--primary)">+${ad.reward_cash}c</b>
+                </div>`;
         });
     }
 
-    function startMission(ad, uid) {
-        if(confirm("광고 사이트에 10초 이상 머물러야 합니다.\n10초 전에 나가면 포인트가 회수됩니다.\n24시간 모니터링 중")) {
-            window.open(ad.link_url, '_blank');
-            setTimeout(async () => {
-                const { error } = await client.rpc('add_cash', { user_id: uid, amount: ad.reward_cash, ad_id: ad.id, msg: ad.title + ' 적립' });
-                if(!error) { alert("적립 완료!"); location.reload(); }
-            }, 10000);
-        }
+    function startMission(id, url, amt) {
+        alert("10초간 광고를 시청해야 적립됩니다!");
+        window.open(url, '_blank');
+        setTimeout(async () => {
+            const { data: { session } } = await client.auth.getSession();
+            await client.rpc('add_cash', { user_id: session.user.id, amount: amt, ad_id: id, msg: '미션 완료 적립' });
+            alert("적립 완료!");
+            location.reload();
+        }, 10000);
     }
 
     async function handleLogin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('pw').value;
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        const { error } = await client.auth.signInWithPassword({ email, password });
         if(error) {
-            // 회원가입 시도
-            const { error: signUpErr } = await client.auth.signUp({ email, password });
-            if(signUpErr) alert(signUpErr.message);
-            else alert("가입 확인 메일을 확인하세요!");
+            const { error: sErr } = await client.auth.signUp({ email, password });
+            if(sErr) alert("오류: " + sErr.message);
+            else alert("인증 메일을 확인해 주세요!");
         } else location.reload();
     }
-
-    checkAuth();
+    init();
 </script>
 </body>
 </html>
