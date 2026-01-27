@@ -2,110 +2,68 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>codetbase | 어드민 대시보드</title>
+    <title>codetbase | 어드민</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --main: #0052D4; --red: #ff4d4d; }
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; }
-        .sidebar { width: 250px; background: #1a1a1b; color: white; min-height: 100vh; padding: 20px; }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #f8f9fa; font-size: 13px; color: #666; }
-        
-        input, select { padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-main { background: var(--main); color: white; }
-        .btn-red { background: var(--red); color: white; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; }
+        body { font-family: sans-serif; background: #f4f7fa; padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: #0052D4; color: white; width: 100%; }
+        .btn-del { background: #ff4d4d; color: white; padding: 5px 10px; }
+        .btn-edit { background: #333; color: white; padding: 5px 10px; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>codetbase Admin</h2>
-    <p onclick="showTab('ad-section')" style="cursor:pointer">📢 광고 관리</p>
-    <p onclick="showTab('user-section')" style="cursor:pointer">👥 회원 관리</p>
-    <hr>
-    <button class="btn btn-red" onclick="location.href='index.html'">사이트 홈</button>
-</div>
+<div class="container">
+    <h2>💎 codetbase 관리자 센터</h2>
 
-<div class="content">
-    <div id="ad-section" class="tab-content">
-        <div class="card">
-            <h3>🚀 새 광고 등록 / 수정</h3>
-            <input type="hidden" id="edit-id">
-            <input type="text" id="ad-title" placeholder="광고 제목" style="width:200px">
-            <input type="number" id="ad-reward" placeholder="금액(c)" style="width:80px">
-            <input type="text" id="ad-link" placeholder="광고 링크 URL" style="width:300px">
-            <input type="text" id="ad-img" placeholder="배너 이미지 URL" style="width:300px">
-            <button class="btn btn-main" onclick="saveAd()">광고 저장하기</button>
-            <button class="btn" onclick="resetAdForm()">취소</button>
-        </div>
-
-        <div class="card">
-            <h3>📋 광고 리스트</h3>
-            <table id="ad-table">
-                <thead><tr><th>제목</th><th>금액</th><th>이미지</th><th>링크</th><th>관리</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <div class="card">
+        <h3>📢 광고(배너) 등록 및 수정</h3>
+        <input type="hidden" id="edit-id">
+        <label>광고 제목</label><input type="text" id="ad-title" placeholder="예: 네이버 페이 이벤트">
+        <label>적립 캐시</label><input type="number" id="ad-reward" placeholder="예: 100">
+        <label>광고 링크 (이동할 URL)</label><input type="text" id="ad-link" placeholder="https://...">
+        <label>배너 이미지 (이미지 URL)</label><input type="text" id="ad-img" placeholder="https://.../banner.jpg">
+        <button class="btn btn-add" onclick="saveAd()">광고 저장하기 (신규/수정)</button>
     </div>
 
-    <div id="user-section" class="tab-content" style="display:none">
-        <div class="card">
-            <h3>👥 전체 회원 관리</h3>
-            <table id="user-table">
-                <thead><tr><th>닉네임</th><th>이메일</th><th>보유 캐시</th><th>관리</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="history-modal" class="modal">
-    <div class="card" style="width: 500px; max-height: 80vh; overflow-y: auto;">
-        <h3 id="history-title">회원 적립 히스토리</h3>
-        <table id="history-table">
-            <thead><tr><th>날짜</th><th>내용</th><th>금액</th></tr></thead>
+    <div class="card">
+        <h3>📋 현재 등록된 광고 리스트</h3>
+        <table id="ad-table">
+            <thead><tr><th>배너</th><th>제목</th><th>금액</th><th>관리</th></tr></thead>
             <tbody></tbody>
         </table>
-        <br>
-        <button class="btn btn-main" onclick="document.getElementById('history-modal').style.display='none'">닫기</button>
     </div>
 </div>
 
 <script>
     const client = supabase.createClient('URL', 'KEY');
 
-    // 탭 전환
-    function showTab(id) {
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        if(id === 'ad-section') loadAds();
-        if(id === 'user-section') loadUsers();
-    }
-
-    // 광고 로드/저장/삭제
+    // 광고 불러오기
     async function loadAds() {
-        const { data } = await client.from('ads').select('*').order('created_at', {ascending:false});
+        const { data: ads } = await client.from('ads').select('*').order('created_at', {ascending:false});
         const tbody = document.querySelector('#ad-table tbody');
-        tbody.innerHTML = data.map(ad => `
-            <tr>
-                <td>${ad.title}</td>
-                <td>${ad.reward_cash}c</td>
-                <td><img src="${ad.image_url}" width="50" height="30" style="object-fit:cover; border-radius:4px;"></td>
-                <td><small>${ad.link_url.substring(0,20)}...</small></td>
-                <td>
-                    <button onclick="editAd('${ad.id}','${ad.title}',${ad.reward_cash},'${ad.link_url}','${ad.image_url}')">수정</button>
-                    <button class="btn-red" onclick="deleteAd('${ad.id}')">삭제</button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = '';
+        ads.forEach(ad => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><img src="${ad.image_url}" width="60" style="border-radius:4px;"></td>
+                    <td>${ad.title}</td>
+                    <td>${ad.reward_cash}c</td>
+                    <td>
+                        <button class="btn btn-edit" onclick="editAd('${ad.id}','${ad.title}',${ad.reward_cash},'${ad.link_url}','${ad.image_url}')">수정</button>
+                        <button class="btn btn-del" onclick="deleteAd('${ad.id}')">삭제</button>
+                    </td>
+                </tr>`;
+        });
     }
 
+    // 저장 (신규 또는 수정)
     async function saveAd() {
         const id = document.getElementById('edit-id').value;
         const payload = {
@@ -118,69 +76,26 @@
         if(id) { await client.from('ads').update(payload).eq('id', id); } 
         else { await client.from('ads').insert([payload]); }
         
-        resetAdForm();
-        loadAds();
+        alert("저장되었습니다.");
+        location.reload();
     }
 
-    async function deleteAd(id) {
-        if(confirm("정말 삭제하시겠습니까?")) {
-            await client.from('ads').delete().eq('id', id);
-            loadAds();
-        }
-    }
-
+    // 수정 모드 전환
     function editAd(id, t, r, l, i) {
         document.getElementById('edit-id').value = id;
         document.getElementById('ad-title').value = t;
         document.getElementById('ad-reward').value = r;
         document.getElementById('ad-link').value = l;
         document.getElementById('ad-img').value = i;
+        window.scrollTo(0, 0); // 화면 위로 올리기
     }
 
-    function resetAdForm() {
-        document.getElementById('edit-id').value = '';
-        document.getElementById('ad-title').value = '';
-        document.getElementById('ad-reward').value = '';
-        document.getElementById('ad-link').value = '';
-        document.getElementById('ad-img').value = '';
-    }
-
-    // 회원 관리 및 히스토리
-    async function loadUsers() {
-        const { data } = await client.from('profiles').select('*');
-        const tbody = document.querySelector('#user-table tbody');
-        tbody.innerHTML = data.map(u => `
-            <tr>
-                <td><input type="text" value="${u.nickname || ''}" id="nick-${u.id}"></td>
-                <td>${u.id.substring(0,8)}...</td>
-                <td><input type="number" value="${u.cash}" id="cash-${u.id}" style="width:80px"></td>
-                <td>
-                    <button onclick="updateUser('${u.id}')">저장</button>
-                    <button onclick="showHistory('${u.id}', '${u.nickname}')">📜 히스토리</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    async function updateUser(id) {
-        const nick = document.getElementById('nick-'+id).value;
-        const cash = document.getElementById('cash-'+id).value;
-        await client.from('profiles').update({ nickname: nick, cash: cash }).eq('id', id);
-        alert("회원 정보 수정 완료");
-    }
-
-    async function showHistory(uid, nick) {
-        const { data } = await client.from('logs').select('*').eq('user_id', uid).order('created_at', {ascending:false});
-        document.getElementById('history-title').innerText = `${nick || '회원'}님의 적립 히스토리`;
-        const tbody = document.querySelector('#history-table tbody');
-        tbody.innerHTML = data.map(l => `
-            <tr>
-                <td><small>${new Date(l.created_at).toLocaleDateString()}</small></td>
-                <td>${l.msg}</td>
-                <td style="color:blue">+${l.amount}</td>
-            </tr>
-        `).join('');
-        document.getElementById('history-modal').style.display = 'flex';
+    // 삭제
+    async function deleteAd(id) {
+        if(confirm("정말 삭제하시겠습니까?")) {
+            await client.from('ads').delete().eq('id', id);
+            loadAds();
+        }
     }
 
     loadAds();
