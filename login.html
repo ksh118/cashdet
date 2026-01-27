@@ -6,82 +6,84 @@
     
     <meta name="adpick-auth" content="여기에_애드픽_인증코드를_넣으세요">
     
-    <title>codetbase | 스마트한 자산관리의 시작</title>
+    <title>캐시뎃 | 보는 것만으로 돈이 되는 광고형 재테크</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --primary-color: #0052D4;
-            --bg-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary-color: #0052D4; /* 신뢰감 있는 블루 */
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
         }
 
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f0f2f5; /* 재테크 느낌의 깔끔한 배경 */
-            color: #333;
+            background: #f4f7fa; /* 깔끔한 배경색 */
+            color: var(--text-main);
         }
 
         .auth-card {
-            background: white;
+            background: var(--card-bg);
             padding: 50px 40px;
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.07);
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
 
         .logo {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 34px;
+            font-weight: 900;
             color: var(--primary-color);
-            margin-bottom: 8px;
-            letter-spacing: -1px;
+            margin-bottom: 10px;
+            letter-spacing: -1.5px;
         }
 
         .sub-title {
-            color: #666;
+            color: var(--text-sub);
             font-size: 15px;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
+            line-height: 1.5;
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             text-align: left;
         }
 
         label {
             display: block;
             font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #444;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #333;
             padding-left: 4px;
         }
 
         input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 15px;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
             font-size: 16px;
             box-sizing: border-box;
-            background: #f9f9f9;
-            transition: all 0.2s;
+            background: #fcfcfc;
+            transition: all 0.2s ease;
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary-color);
             background: white;
-            box-shadow: 0 0 0 4px rgba(0, 82, 212, 0.1);
+            box-shadow: 0 0 0 4px rgba(0, 82, 212, 0.08);
         }
 
         .main-btn {
@@ -94,34 +96,34 @@
             font-size: 17px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
+            margin-top: 10px;
+            transition: background 0.2s;
         }
 
-        .main-btn:active { transform: scale(0.98); }
+        .main-btn:hover { background: #0041a8; }
 
         .toggle-btn {
             margin-top: 25px;
             font-size: 14px;
-            color: #777;
+            color: #888;
         }
 
         .toggle-btn span {
             color: var(--primary-color);
             font-weight: 700;
             cursor: pointer;
-            text-decoration: underline;
+            margin-left: 5px;
         }
 
         .divider {
-            margin: 30px 0;
+            margin: 35px 0 25px;
             height: 1px;
             background: #eee;
             position: relative;
         }
 
         .divider::after {
-            content: "간편 로그인";
+            content: "간편 인증";
             position: absolute;
             top: -10px;
             left: 50%;
@@ -129,7 +131,7 @@
             background: white;
             padding: 0 15px;
             font-size: 12px;
-            color: #aaa;
+            color: #bbb;
         }
 
         .google-btn {
@@ -145,7 +147,10 @@
             cursor: pointer;
             font-size: 15px;
             font-weight: 600;
+            transition: background 0.2s;
         }
+
+        .google-btn:hover { background: #f9f9f9; }
 
         .hidden { display: none; }
     </style>
@@ -153,18 +158,18 @@
 <body>
 
 <div class="auth-card">
-    <div class="logo">codetbase</div>
-    <div class="sub-title" id="sub-title">데이터 기반의 자산 관리 솔루션</div>
+    <div class="logo">cashdet</div>
+    <div class="sub-title" id="sub-title">보는 것만으로 돈이 되는<br>광고형 재테크의 시작</div>
 
     <form id="auth-form">
         <div class="input-group">
-            <label>이메일 주소</label>
-            <input type="email" id="email" placeholder="example@mail.com" required>
+            <label>이메일</label>
+            <input type="email" id="email" placeholder="email@address.com" required>
         </div>
 
         <div class="input-group hidden" id="nickname-group">
             <label>닉네임</label>
-            <input type="text" id="nickname" placeholder="2~10자 한글/영문/숫자">
+            <input type="text" id="nickname" placeholder="2~10자 한글, 영문, 숫자">
         </div>
 
         <div class="input-group">
@@ -187,61 +192,61 @@
 </div>
 
 <script>
-    // Supabase 초기화 (이전 대화에서 주신 정보 적용)
+    // Supabase 정보
     const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let isSignUp = false;
 
-    // UI 전환 함수
     const toggleAuth = document.getElementById('toggle-auth');
     const subTitle = document.getElementById('sub-title');
     const nicknameGroup = document.getElementById('nickname-group');
     const submitBtn = document.getElementById('submit-btn');
 
+    // UI 모드 전환 (로그인 <-> 회원가입)
     toggleAuth.addEventListener('click', () => {
         isSignUp = !isSignUp;
-        submitBtn.innerText = isSignUp ? '회원가입' : '로그인';
-        subTitle.innerText = isSignUp ? '나만의 자산 포트폴리오 만들기' : '데이터 기반의 자산 관리 솔루션';
+        submitBtn.innerText = isSignUp ? '회원가입 시작하기' : '로그인';
+        subTitle.innerHTML = isSignUp ? '간단한 가입으로<br>지금 바로 수익을 만드세요' : '보는 것만으로 돈이 되는<br>광고형 재테크의 시작';
         toggleAuth.innerText = isSignUp ? '이미 계정이 있으신가요? 로그인' : '아직 회원이 아니신가요? 회원가입';
         nicknameGroup.classList.toggle('hidden');
     });
 
-    // 로그인/회원가입 실행 함수
+    // 폼 제출 이벤트
     document.getElementById('auth-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const nickname = document.getElementById('nickname').value;
 
-        // 유효성 검사 (Regex)
+        // 정규식 유효성 검사
         const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
         const nickRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
 
         if (!pwRegex.test(password)) {
-            alert("보안을 위해 비밀번호는 영문 대소문자, 숫자, 특수문자를 포함해 8~16자로 설정해주세요.");
+            alert("비밀번호 규칙을 확인하세요 (영문 대소문자, 숫자, 특수문자 포함 8~16자).");
             return;
         }
 
         if (isSignUp) {
             if (!nickRegex.test(nickname)) {
-                alert("닉네임은 2~10자의 한글, 영문, 숫자만 사용 가능합니다.");
+                alert("닉네임은 공백 없이 2~10자의 한글, 영문, 숫자만 가능합니다.");
                 return;
             }
             const { error } = await client.auth.signUp({
                 email, password, options: { data: { display_name: nickname } }
             });
             if (error) alert(error.message);
-            else alert("인증 이메일이 발송되었습니다. 확인 후 로그인해 주세요!");
+            else alert("인증 메일을 보냈습니다. 메일 확인 후 로그인해 주세요!");
         } else {
             const { error } = await client.auth.signInWithPassword({ email, password });
-            if (error) alert("계정 정보가 일치하지 않습니다.");
+            if (error) alert("이메일 또는 비밀번호가 올바르지 않습니다.");
             else window.location.href = '/home';
         }
     });
 
-    // 구글 로그인 함수
+    // 구글 로그인
     document.getElementById('google-login').addEventListener('click', async () => {
         await client.auth.signInWithOAuth({
             provider: 'google',
@@ -249,7 +254,7 @@
         });
     });
 
-    // 세션 유지 및 자동 이동
+    // 접속 시 로그인 세션 체크
     async function checkUser() {
         const { data: { session } } = await client.auth.getSession();
         if (session) window.location.href = '/home';
