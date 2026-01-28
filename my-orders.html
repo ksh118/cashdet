@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구매 현황 - 캐시봇</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            padding-bottom: 80px;
+        }
+        .container { max-width: 600px; margin: 0 auto; background: white; min-height: 100vh; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .page-title { font-size: 22px; font-weight: 700; }
+        
+        .notice-banner {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px 20px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 20px 0 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .orders-list {
+            padding: 20px;
+        }
+        .order-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .order-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .order-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .order-info {
+            flex: 1;
+        }
+        .order-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+        .order-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .order-date {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        /* 상태 진행 바 */
+        .status-tracker {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .status-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .status-line {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 0;
+        }
+        .status-line-active {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            height: 3px;
+            background: #667eea;
+            z-index: 1;
+            transition: width 0.3s;
+        }
+        .status-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .status-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .status-step.active .status-icon {
+            background: #667eea;
+            color: white;
+        }
+        .status-step.completed .status-icon {
+            background: #27ae60;
+            color: white;
+        }
+        .status-label {
+            font-size: 11px;
+            color: #95a5a6;
+            text-align: center;
+        }
+        .status-step.active .status-label,
+        .status-step.completed .status-label {
+            color: #2d3436;
+            font-weight: 600;
+        }
+        .status-date {
+            font-size: 10px;
+            color: #95a5a6;
+            margin-top: 3px;
+        }
+        
+        .coupon-notice {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <div class="page-title">구매 현황</div>
+            </div>
+        </div>
+
+        <div class="notice-banner">
+            📦 전송 완료된 쿠폰은 '마이 > 쿠폰함'에서 확인하실 수 있습니다.
+        </div>
+
+        <div class="orders-list" id="ordersList">
+            <div style="text-align: center; padding: 40px; color: #95a5a6;">
+                주문 내역을 불러오는 중...
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            홈
+        </a>
+        <a href="missions.html" class="nav-item">
+            <span class="nav-icon">🎯</span>
+            미션
+        </a>
+        <a href="shop.html" class="nav-item active">
+            <span class="nav-icon">🛍️</span>
+            상점
+        </a>
+        <a href="attendance.html" class="nav-item">
+            <span class="nav-icon">📅</span>
+            출석
+        </a>
+        <a href="me.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            마이
+        </a>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+
+        const statusConfig = {
+            '구매 승인': { step: 1, icon: '✓' },
+            '준비중': { step: 2, icon: '📦' },
+            '전송완료': { step: 3, icon: '✉️' }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            await loadOrders();
+        });
+
+        async function loadOrders() {
+            const userId = localStorage.getItem('userId');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/orders?user_id=eq.${userId}&order=created_at.desc`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                
+                const orders = await response.json();
+                const list = document.getElementById('ordersList');
+
+                if (orders.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🛍️</div>
+                            <div>구매 내역이 없습니다</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = orders.map(order => {
+                    const currentStatus = statusConfig[order.status];
+                    const progressWidth = ((currentStatus.step - 1) / 2) * 100;
+                    
+                    return `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <img src="${order.product_image || 'https://via.placeholder.com/80'}" 
+                                     class="order-image" 
+                                     alt="${order.product_name}">
+                                <div class="order-info">
+                                    <div class="order-name">${order.product_name}</div>
+                                    <div class="order-price">${order.product_price.toLocaleString()}원</div>
+                                    <div class="order-date">주문일: ${new Date(order.created_at).toLocaleDateString('ko-KR')}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="status-tracker">
+                                <div class="status-steps">
+                                    <div class="status-line"></div>
+                                    <div class="status-line-active" style="width: ${progressWidth}%"></div>
+                                    
+                                    <div class="status-step ${currentStatus.step >= 1 ? 'completed' : ''}">
+                                        <div class="status-icon">✓</div>
+                                        <div class="status-label">구매 승인</div>
+                                        ${order.approved_at ? `<div class="status-date">${new Date(order.approved_at).toLocaleDateString('ko-KR', {month:'short', day:'numeric'})}</div>` : ''}
+                                    </div>
+                                    
+                                    <div class="status-step ${currentStatus.step >= 2 ? currentStatus.step === 2 ? 'active' : 'completed' : ''}">
+                                        <div class="status-icon">📦</div>
+                                        <div class="status-label">준비중</div>
+                                        ${order.preparing_at ? `<div class="status-date">${new Date(order.preparing_at).toLocaleDateString('ko-KR', {month:'short', day:'numeric'})}</div>` : ''}
+                                    </div>
+                                    
+                                    <div class="status-step ${currentStatus.step >= 3 ? 'completed' : ''}">
+                                        <div class="status-icon">✉️</div>
+                                        <div class="status-label">전송완료</div>
+                                        ${order.completed_at ? `<div class="status-date">${new Date(order.completed_at).toLocaleDateString('ko-KR', {month:'short', day:'numeric'})}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${order.status === '전송완료' ? `
+                                <div class="coupon-notice">
+                                    🎉 쿠폰함에서 확인 가능합니다!
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('주문 로드 오류:', error);
+                document.getElementById('ordersList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div>주문 내역을 불러오는 중 오류가 발생했습니다</div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
