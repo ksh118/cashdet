@@ -4,38 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>캐시뎃 | CashDet</title>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-container {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: white; border-radius: 30px; padding: 40px;
+            max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
         }
+        .logo-icon { font-size: 50px; margin-bottom: 10px; }
         .logo-text {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 32px; font-weight: 800;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .tabs { display: flex; gap: 10px; margin: 25px 0; }
+        .logo-subtitle { font-size: 14px; color: #95a5a6; margin-top: 5px; margin-bottom: 25px; line-height: 1.5; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
         .tab {
             flex: 1; padding: 12px; border: none; border-radius: 10px;
             background: #f1f2f6; cursor: pointer; font-weight: 600; color: #95a5a6;
@@ -43,43 +33,41 @@
         .tab.active { background: #667eea; color: white; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
-        .form-input {
-            width: 100%; padding: 12px; border: 2px solid #dfe6e9;
-            border-radius: 10px; font-size: 15px;
-        }
+        .form-input { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 15px; }
         .submit-btn {
             width: 100%; padding: 15px; border: none; border-radius: 10px;
             background: #667eea; color: white; font-size: 16px; font-weight: 700;
             cursor: pointer; margin-top: 10px;
         }
-        .checkbox-group {
-            margin: 15px 0; text-align: left; background: #f8f9fa;
-            padding: 12px; border-radius: 10px; font-size: 13px;
-        }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; }
-        .checkbox-item a { color: #667eea; text-decoration: none; font-weight: bold; }
+        .checkbox-group { margin: 15px 0; text-align: left; background: #f8f9fa; padding: 12px; border-radius: 10px; font-size: 13px; }
+        .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; cursor: pointer; }
+        .checkbox-item a { color: #667eea; text-decoration: underline; font-weight: bold; }
         .form-content { display: none; }
         .form-content.active { display: block; }
-        .error-message { color: #d63031; font-size: 13px; margin-bottom: 15px; display: none; }
+        .divider { margin: 25px 0; height: 1px; background: #eee; position: relative; }
+        .divider::after { content: "또는"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #bbb; font-size: 12px; }
+        .google-btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    <div class="logo-text">cashdet</div>
-    
+    <div class="logo">
+        <div class="logo-icon">💰</div>
+        <div class="logo-text">cashdet</div>
+        <div id="logo-subtitle" class="logo-subtitle">보는 것만으로 돈이 되는<br>광고형 재테크의 시작</div>
+    </div>
+
     <div class="tabs">
         <button class="tab active" onclick="switchTab('login')">로그인</button>
         <button class="tab" onclick="switchTab('signup')">회원가입</button>
     </div>
 
-    <div id="errorBox" class="error-message"></div>
-
     <div id="loginForm" class="form-content active">
         <form onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label class="form-label">이메일 또는 전화번호</label>
-                <input type="text" id="loginId" class="form-input" placeholder="example@mail.com 또는 01012345678" required>
+                <label class="form-label">전화번호</label>
+                <input type="tel" id="loginPhone" class="form-input" placeholder="01012345678" required>
             </div>
             <div class="form-group">
                 <label class="form-label">비밀번호</label>
@@ -91,65 +79,99 @@
 
     <div id="signupForm" class="form-content">
         <form onsubmit="handleSignup(event)">
-            <div class="form-group"><label class="form-label">이메일</label><input type="email" id="sEmail" class="form-input" required></div>
-            <div class="form-group"><label class="form-label">전화번호</label><input type="tel" id="sPhone" class="form-input" placeholder="01012345678" required></div>
-            <div class="form-group"><label class="form-label">닉네임</label><input type="text" id="sNick" class="form-input" required></div>
-            <div class="form-group"><label class="form-label">비밀번호</label><input type="password" id="sPw" class="form-input" required></div>
-            
-            <div class="checkbox-group">
-                <label class="checkbox-item"><input type="checkbox" id="check1" required> 만 14세 이상입니다.</label>
-                <label class="checkbox-item"><input type="checkbox" id="check2" required> <a href="http://www.cashdet.kro.kr/g1.html" target="_blank">이용약관</a> 동의</label>
-                <label class="checkbox-item"><input type="checkbox" id="check3" required> <a href="http://www.cashdet.kro.kr/g2.html" target="_blank">개인정보 처리방침</a> 동의</label>
+            <div class="form-group">
+                <label class="form-label">전화번호 (아이디로 사용)</label>
+                <input type="tel" id="sPhone" class="form-input" placeholder="01012345678" required>
             </div>
-            <button type="submit" class="submit-btn">회원가입 완료</button>
+            <div class="form-group">
+                <label class="form-label">닉네임</label>
+                <input type="text" id="sNick" class="form-input" placeholder="2~10자 한글/영문" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                <input type="password" id="sPw" class="form-input" placeholder="비밀번호 입력" required>
+            </div>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" required> <span>(필수) 만 14세 이상입니다.</span></label>
+                <label class="checkbox-item"><input type="checkbox" required> <span>(필수) <a href="http://www.cashdet.kro.kr/g1.html" target="_blank">이용약관</a> 동의</span></label>
+                <label class="checkbox-item"><input type="checkbox" required> <span>(필수) <a href="http://www.cashdet.kro.kr/g2.html" target="_blank">개인정보 처리방침</a> 동의</span></label>
+            </div>
+            <button type="submit" class="submit-btn">가입 완료</button>
         </form>
     </div>
+
+    <div class="divider"></div>
+    <button type="button" class="google-btn" onclick="googleLogin()">
+        <img src="https://www.google.com/favicon.ico" width="18"> Google 로그인
+    </button>
 </div>
 
 <script>
+    // ⚠️ 중요: 여기에 님의 Supabase 정보를 다시 입력하세요.
     const S_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
-    const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // 기존 키 그대로 사용
+    const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
     const supabaseClient = supabase.createClient(S_URL, S_KEY);
 
     function switchTab(type) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById('loginForm').classList.toggle('active', type === 'login');
         document.getElementById('signupForm').classList.toggle('active', type === 'signup');
+        event.target.classList.add('active');
+        
+        const subtitle = document.getElementById('logo-subtitle');
+        subtitle.innerHTML = (type === 'login') ? '보는 것만으로 돈이 되는<br>광고형 재테크의 시작' : '간단한 가입으로<br>지금 바로 수익을 만드세요';
     }
 
     async function handleLogin(e) {
         e.preventDefault();
-        const id = document.getElementById('loginId').value;
+        const phone = document.getElementById('loginPhone').value;
         const pw = document.getElementById('loginPw').value;
 
         const { data, error } = await supabaseClient.from('users')
-            .select('*').eq('password', pw).or(`email.eq.${id},phone.eq.${id}`);
+            .select('*').eq('phone', phone).eq('password', pw);
 
         if (data && data.length > 0) {
             localStorage.setItem('userId', data[0].id);
             location.href = 'index.html';
         } else {
-            alert('정보가 일치하지 않습니다.');
+            alert('전화번호 또는 비밀번호가 틀렸습니다.');
         }
     }
 
     async function handleSignup(e) {
         e.preventDefault();
-        const email = document.getElementById('sEmail').value;
         const phone = document.getElementById('sPhone').value;
         const nickname = document.getElementById('sNick').value;
         const password = document.getElementById('sPw').value;
 
-        const { data: exist } = await supabaseClient.from('users').select('id').or(`email.eq.${email},phone.eq.${phone}`);
-        if (exist && exist.length > 0) return alert('이미 가입된 정보입니다.');
+        // 중복 체크
+        const { data: exist } = await supabaseClient.from('users').select('id').eq('phone', phone);
+        if (exist && exist.length > 0) return alert('이미 가입된 전화번호입니다.');
 
-        const { error } = await supabaseClient.from('users').insert([{ email, phone, nickname, password, cash: 0 }]);
+        // 저장 (이메일 칸이 필수가 아닐 때 기준, 오류 나면 이메일 칸에 번호+@temp.com이라도 넣어야 함)
+        const { error } = await supabaseClient.from('users').insert([{ 
+            phone: phone, 
+            nickname: nickname, 
+            password: password, 
+            cash: 0,
+            email: phone + "@cashdet.user" // 이메일 필드가 필수일 경우를 대비한 가상 이메일
+        }]);
+
         if (!error) {
             alert('가입 성공! 로그인해주세요.');
             switchTab('login');
         } else {
-            alert('오류가 발생했습니다.');
+            console.error(error);
+            alert('오류 발생: SQL 설정을 확인하세요.');
         }
+    }
+
+    async function googleLogin() {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + '/index.html' }
+        });
+        if (error) alert('구글 로그인 설정이 필요합니다.');
     }
 </script>
 
