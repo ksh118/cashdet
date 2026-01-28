@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>캐시뎃 | 보는 것만으로 돈이 되는 광고형 재테크</title>
+    <title>캐시뎃 | CashDet</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -23,458 +18,140 @@
             justify-content: center;
             padding: 20px;
         }
-
         .login-container {
             background: white;
             border-radius: 30px;
-            padding: 50px 40px;
-            max-width: 400px;
+            padding: 40px;
+            max-width: 420px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .logo {
             text-align: center;
-            margin-bottom: 40px;
         }
-
-        .logo-icon {
-            font-size: 64px;
-            margin-bottom: 15px;
-        }
-
         .logo-text {
             font-size: 32px;
             font-weight: 800;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
-
-        .logo-subtitle {
-            font-size: 14px;
-            color: #95a5a6;
-            margin-top: 5px;
-            line-height: 1.5;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
+        .tabs { display: flex; gap: 10px; margin: 25px 0; }
         .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            background: #f1f2f6;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #95a5a6;
-            transition: all 0.3s;
+            flex: 1; padding: 12px; border: none; border-radius: 10px;
+            background: #f1f2f6; cursor: pointer; font-weight: 600; color: #95a5a6;
         }
-
-        .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2d3436;
-            font-size: 14px;
-        }
-
+        .tab.active { background: #667eea; color: white; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
         .form-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #dfe6e9;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: #fcfcfc;
+            width: 100%; padding: 12px; border: 2px solid #dfe6e9;
+            border-radius: 10px; font-size: 15px;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.08);
-        }
-
         .submit-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            width: 100%; padding: 15px; border: none; border-radius: 10px;
+            background: #667eea; color: white; font-size: 16px; font-weight: 700;
+            cursor: pointer; margin-top: 10px;
         }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        .checkbox-group {
+            margin: 15px 0; text-align: left; background: #f8f9fa;
+            padding: 12px; border-radius: 10px; font-size: 13px;
         }
-
-        .form-content {
-            display: none;
-        }
-
-        .form-content.active {
-            display: block;
-        }
-
-        .error-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .divider {
-            margin: 35px 0 25px;
-            height: 1px;
-            background: #eee;
-            position: relative;
-        }
-
-        .divider::after {
-            content: "간편 인증";
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 0 15px;
-            font-size: 12px;
-            color: #bbb;
-        }
-
-        .google-btn {
-            width: 100%;
-            padding: 13px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .google-btn:hover { 
-            background: #f9f9f9; 
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; }
+        .checkbox-item a { color: #667eea; text-decoration: none; font-weight: bold; }
+        .form-content { display: none; }
+        .form-content.active { display: block; }
+        .error-message { color: #d63031; font-size: 13px; margin-bottom: 15px; display: none; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
-            <div class="logo-icon">💰</div>
-            <div class="logo-text">cashdet</div>
-            <div class="logo-subtitle" id="logo-subtitle">보는 것만으로 돈이 되는<br>광고형 재테크의 시작</div>
-        </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('login')">로그인</button>
-            <button class="tab" onclick="switchTab('signup')">회원가입</button>
-        </div>
-
-        <div class="error-message" id="errorMessage"></div>
-
-        <!-- 로그인 폼 -->
-        <div class="form-content active" id="loginForm">
-            <form onsubmit="login(event)">
-                <div class="form-group">
-                    <label class="form-label">이메일</label>
-                    <input type="email" class="form-input" id="loginEmail" placeholder="email@address.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호</label>
-                    <input type="password" class="form-input" id="loginPassword" placeholder="대소문자+특수문자 조합 8~16자" required>
-                </div>
-                <button type="submit" class="submit-btn">로그인</button>
-            </form>
-        </div>
-
-        <!-- 회원가입 폼 -->
-        <div class="form-content" id="signupForm">
-            <form onsubmit="signup(event)">
-                <div class="form-group">
-                    <label class="form-label">이메일</label>
-                    <input type="email" class="form-input" id="signupEmail" placeholder="email@address.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">닉네임</label>
-                    <input type="text" class="form-input" id="signupNickname" placeholder="2~10자 한글, 영문, 숫자" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호</label>
-                    <input type="password" class="form-input" id="signupPassword" placeholder="대소문자+특수문자 조합 8~16자" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호 확인</label>
-                    <input type="password" class="form-input" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
-                </div>
-                <button type="submit" class="submit-btn">회원가입 시작하기</button>
-            </form>
-        </div>
-
-        <div class="divider"></div>
-
-        <button type="button" class="google-btn" id="google-login">
-            <img src="https://www.google.com/favicon.ico" width="18"> Google 계정으로 계속하기
-        </button>
+<div class="login-container">
+    <div class="logo-text">cashdet</div>
+    
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">로그인</button>
+        <button class="tab" onclick="switchTab('signup')">회원가입</button>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div id="errorBox" class="error-message"></div>
 
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const forms = document.querySelectorAll('.form-content');
-            const subtitle = document.getElementById('logo-subtitle');
+    <div id="loginForm" class="form-content active">
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label">이메일 또는 전화번호</label>
+                <input type="text" id="loginId" class="form-input" placeholder="example@mail.com 또는 01012345678" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                <input type="password" id="loginPw" class="form-input" placeholder="비밀번호 입력" required>
+            </div>
+            <button type="submit" class="submit-btn">로그인</button>
+        </form>
+    </div>
+
+    <div id="signupForm" class="form-content">
+        <form onsubmit="handleSignup(event)">
+            <div class="form-group"><label class="form-label">이메일</label><input type="email" id="sEmail" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">전화번호</label><input type="tel" id="sPhone" class="form-input" placeholder="01012345678" required></div>
+            <div class="form-group"><label class="form-label">닉네임</label><input type="text" id="sNick" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">비밀번호</label><input type="password" id="sPw" class="form-input" required></div>
             
-            tabs.forEach(t => t.classList.remove('active'));
-            forms.forEach(f => f.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            
-            if (tab === 'login') {
-                document.getElementById('loginForm').classList.add('active');
-                subtitle.innerHTML = '보는 것만으로 돈이 되는<br>광고형 재테크의 시작';
-            } else {
-                document.getElementById('signupForm').classList.add('active');
-                subtitle.innerHTML = '간단한 가입으로<br>지금 바로 수익을 만드세요';
-            }
-            
-            hideError();
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" id="check1" required> 만 14세 이상입니다.</label>
+                <label class="checkbox-item"><input type="checkbox" id="check2" required> <a href="http://www.cashdet.kro.kr/g1.html" target="_blank">이용약관</a> 동의</label>
+                <label class="checkbox-item"><input type="checkbox" id="check3" required> <a href="http://www.cashdet.kro.kr/g2.html" target="_blank">개인정보 처리방침</a> 동의</label>
+            </div>
+            <button type="submit" class="submit-btn">회원가입 완료</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const S_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+    const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // 기존 키 그대로 사용
+    const supabaseClient = supabase.createClient(S_URL, S_KEY);
+
+    function switchTab(type) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active'));
+        document.getElementById('loginForm').classList.toggle('active', type === 'login');
+        document.getElementById('signupForm').classList.toggle('active', type === 'signup');
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const id = document.getElementById('loginId').value;
+        const pw = document.getElementById('loginPw').value;
+
+        const { data, error } = await supabaseClient.from('users')
+            .select('*').eq('password', pw).or(`email.eq.${id},phone.eq.${id}`);
+
+        if (data && data.length > 0) {
+            localStorage.setItem('userId', data[0].id);
+            location.href = 'index.html';
+        } else {
+            alert('정보가 일치하지 않습니다.');
         }
+    }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
+    async function handleSignup(e) {
+        e.preventDefault();
+        const email = document.getElementById('sEmail').value;
+        const phone = document.getElementById('sPhone').value;
+        const nickname = document.getElementById('sNick').value;
+        const password = document.getElementById('sPw').value;
+
+        const { data: exist } = await supabaseClient.from('users').select('id').or(`email.eq.${email},phone.eq.${phone}`);
+        if (exist && exist.length > 0) return alert('이미 가입된 정보입니다.');
+
+        const { error } = await supabaseClient.from('users').insert([{ email, phone, nickname, password, cash: 0 }]);
+        if (!error) {
+            alert('가입 성공! 로그인해주세요.');
+            switchTab('login');
+        } else {
+            alert('오류가 발생했습니다.');
         }
+    }
+</script>
 
-        function hideError() {
-            document.getElementById('errorMessage').classList.remove('show');
-        }
-
-        async function login(event) {
-            event.preventDefault();
-            hideError();
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                // 기존 방식: users 테이블에서 직접 확인
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(password)}`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-
-                const users = await response.json();
-
-                if (users.length > 0) {
-                    localStorage.setItem('userId', users[0].id);
-                    window.location.href = 'index.html';
-                } else {
-                    showError('이메일 또는 비밀번호가 올바르지 않습니다.');
-                }
-            } catch (error) {
-                showError('로그인 중 오류가 발생했습니다.');
-                console.error(error);
-            }
-        }
-
-        async function signup(event) {
-            event.preventDefault();
-            hideError();
-
-            const email = document.getElementById('signupEmail').value;
-            const nickname = document.getElementById('signupNickname').value;
-            const password = document.getElementById('signupPassword').value;
-            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
-
-            // 정규식 유효성 검사
-            const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
-            const nickRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
-
-            if (!pwRegex.test(password)) {
-                showError("비밀번호 규칙을 확인하세요 (영문 대소문자, 숫자, 특수문자 포함 8~16자)");
-                return;
-            }
-
-            if (!nickRegex.test(nickname)) {
-                showError("닉네임은 공백 없이 2~10자의 한글, 영문, 숫자만 가능합니다.");
-                return;
-            }
-
-            if (password !== passwordConfirm) {
-                showError('비밀번호가 일치하지 않습니다.');
-                return;
-            }
-
-            try {
-                // 이메일 중복 체크
-                const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-
-                const existingUsers = await checkResponse.json();
-
-                if (existingUsers.length > 0) {
-                    showError('이미 사용 중인 이메일입니다.');
-                    return;
-                }
-
-                // 회원가입 - users 테이블에 직접 추가
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        nickname: nickname,
-                        password: password,
-                        cash: 0
-                    })
-                });
-
-                if (response.ok) {
-                    const newUsers = await response.json();
-                    alert('회원가입이 완료되었습니다!');
-                    // 회원가입 후 로그인 탭으로 전환
-                    document.querySelector('.tab:first-child').click();
-                    // 이메일 자동 입력
-                    document.getElementById('loginEmail').value = email;
-                } else {
-                    showError('회원가입 중 오류가 발생했습니다.');
-                }
-            } catch (error) {
-                showError('회원가입 중 오류가 발생했습니다.');
-                console.error(error);
-            }
-        }
-
-        // 구글 로그인
-        document.getElementById('google-login').addEventListener('click', async () => {
-            try {
-                const { data, error } = await client.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { 
-                        redirectTo: window.location.origin + '/index.html' 
-                    }
-                });
-                
-                if (error) {
-                    console.error('Google OAuth error:', error);
-                    showError('구글 로그인에 실패했습니다. Supabase에서 Google Provider를 활성화해주세요.');
-                }
-            } catch (error) {
-                console.error('Google login error:', error);
-                showError('구글 로그인 중 오류가 발생했습니다.');
-            }
-        });
-
-        // 접속 시 로그인 세션 체크
-        async function checkUser() {
-            // 먼저 localStorage 확인
-            if (localStorage.getItem('userId')) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            // Supabase Auth 세션 확인 (구글 로그인용)
-            try {
-                const { data: { session } } = await client.auth.getSession();
-                if (session) {
-                    // 구글 로그인으로 들어온 경우 users 테이블에 추가
-                    const email = session.user.email;
-                    const nickname = session.user.user_metadata?.display_name || session.user.email.split('@')[0];
-                    
-                    // users 테이블에 해당 이메일이 있는지 확인
-                    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}`, {
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`
-                        }
-                    });
-                    
-                    const existingUsers = await checkResponse.json();
-                    
-                    if (existingUsers.length > 0) {
-                        // 이미 있으면 해당 ID 사용
-                        localStorage.setItem('userId', existingUsers[0].id);
-                    } else {
-                        // 없으면 새로 생성
-                        const createResponse = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-                            method: 'POST',
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Content-Type': 'application/json',
-                                'Prefer': 'return=representation'
-                            },
-                            body: JSON.stringify({
-                                email: email,
-                                nickname: nickname,
-                                password: 'google_oauth_' + session.user.id, // 구글 로그인용 더미 비밀번호
-                                cash: 0
-                            })
-                        });
-                        
-                        const newUsers = await createResponse.json();
-                        localStorage.setItem('userId', newUsers[0].id);
-                    }
-                    
-                    window.location.href = 'index.html';
-                }
-            } catch (error) {
-                console.error('Session check error:', error);
-            }
-        }
-        checkUser();
-    </script>
 </body>
 </html>
