@@ -134,6 +134,71 @@
         }
         .nav-item.active { color: #667eea; }
         .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+        .modal-description {
+            color: #636e72;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f1f2f6;
+            color: #2d3436;
+        }
+        .btn-secondary:hover { background: #dfe6e9; }
     </style>
 </head>
 <body>
@@ -173,11 +238,28 @@
         </a>
     </div>
 
+    <!-- 미션 안내 모달 -->
+    <div class="modal" id="missionModal">
+        <div class="modal-content">
+            <div class="modal-icon">🎯</div>
+            <div class="modal-title" id="modalMissionTitle">미션을 시작하시겠습니까?</div>
+            <div class="modal-description" id="modalMissionDescription">
+                광고 페이지가 새 탭으로 열립니다.<br>
+                시작 버튼을 누르면 즉시 보상이 지급됩니다!
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-primary" onclick="startMission()">시작하기</button>
+                <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
         let currentUser = null;
+        let currentMission = null;
         let allMissions = [];
         let completedMissionIds = [];
         let currentTab = 'ongoing';
@@ -191,82 +273,6 @@
 
             await loadUserData();
             await loadAllMissions();
-        });
-
-        // 페이지 돌아왔을 때 미션 완료 체크
-        document.addEventListener('visibilitychange', async () => {
-            if (!document.hidden) {
-                const missionId = sessionStorage.getItem('currentMissionId');
-                const startTime = sessionStorage.getItem('missionStartTime');
-                
-                if (missionId && startTime) {
-                    const elapsed = Date.now() - parseInt(startTime);
-                    
-                    if (elapsed >= 10000) {
-                        const userId = localStorage.getItem('userId');
-                        const reward = parseInt(sessionStorage.getItem('currentMissionReward'));
-                        const title = sessionStorage.getItem('currentMissionTitle');
-                        
-                        const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${missionId}`, {
-                            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-                        });
-                        const existing = await checkResponse.json();
-                        
-                        if (existing.length === 0) {
-                            await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
-                                method: 'POST',
-                                headers: {
-                                    'apikey': SUPABASE_KEY,
-                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                    'Content-Type': 'application/json',
-                                    'Prefer': 'return=minimal'
-                                },
-                                body: JSON.stringify({
-                                    user_id: userId,
-                                    mission_id: missionId,
-                                    cash_earned: reward
-                                })
-                            });
-
-                            const newCash = currentUser.cash + reward;
-                            await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'apikey': SUPABASE_KEY,
-                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                    'Content-Type': 'application/json',
-                                    'Prefer': 'return=minimal'
-                                },
-                                body: JSON.stringify({ cash: newCash })
-                            });
-
-                            await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                                method: 'POST',
-                                headers: {
-                                    'apikey': SUPABASE_KEY,
-                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                    'Content-Type': 'application/json',
-                                    'Prefer': 'return=minimal'
-                                },
-                                body: JSON.stringify({
-                                    user_id: userId,
-                                    type: 'mission',
-                                    message: `미션 성공! "${title}" 완료로 +${reward.toLocaleString()}원이 적립되었습니다.`
-                                })
-                            });
-
-                            alert(`미션 완료! +${reward.toLocaleString()}원이 적립되었습니다.`);
-                            
-                            sessionStorage.removeItem('currentMissionId');
-                            sessionStorage.removeItem('currentMissionReward');
-                            sessionStorage.removeItem('currentMissionTitle');
-                            sessionStorage.removeItem('missionStartTime');
-                            
-                            location.reload();
-                        }
-                    }
-                }
-            }
         });
 
         async function loadUserData() {
@@ -308,7 +314,7 @@
                 ongoingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>모든 미션을 완료했습니다!</div></div>';
             } else {
                 ongoingDiv.innerHTML = ongoing.map(mission => `
-                    <div class="mission-card" onclick="openMission('${mission.id}', false)">
+                    <div class="mission-card" onclick="openMission('${mission.id}')">
                         <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
                         <div class="mission-content">
                             <div>
@@ -359,16 +365,90 @@
             }
         }
 
-        function openMission(missionId, isCompleted) {
+        async function openMission(missionId) {
             const mission = allMissions.find(m => m.id === missionId);
-            if (!mission || isCompleted) return;
+            if (!mission) return;
 
-            sessionStorage.setItem('currentMissionId', mission.id);
-            sessionStorage.setItem('currentMissionReward', mission.cash_reward);
-            sessionStorage.setItem('currentMissionTitle', mission.title);
-            sessionStorage.setItem('missionStartTime', Date.now());
+            currentMission = mission;
+            document.getElementById('modalMissionTitle').textContent = currentMission.title;
+            document.getElementById('missionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('missionModal').classList.remove('active');
+            currentMission = null;
+        }
+
+        async function startMission() {
+            if (!currentMission) return;
+
+            const userId = localStorage.getItem('userId');
             
-            window.open(mission.link, '_blank');
+            // 이미 완료했는지 체크
+            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${currentMission.id}`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const existing = await checkResponse.json();
+            
+            if (existing.length > 0) {
+                alert('이미 완료한 미션입니다.');
+                closeModal();
+                return;
+            }
+
+            // 미션 완료 처리
+            await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    mission_id: currentMission.id,
+                    cash_earned: currentMission.cash_reward
+                })
+            });
+
+            // 캐시 업데이트
+            const newCash = currentUser.cash + currentMission.cash_reward;
+            await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ cash: newCash })
+            });
+
+            // 알림 생성
+            await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    type: 'mission',
+                    message: `미션 성공! "${currentMission.title}" 완료로 +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
+                })
+            });
+
+            // 새 탭으로 링크 열기
+            window.open(currentMission.link, '_blank');
+
+            closeModal();
+            alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
+            
+            // 페이지 새로고침
+            location.reload();
         }
     </script>
 </body>
