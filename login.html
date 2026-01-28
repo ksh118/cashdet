@@ -3,116 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta name="adpick-auth" content="여기에_애드픽_인증코드를_넣으세요">
-    
     <title>캐시뎃 | 보는 것만으로 돈이 되는 광고형 재테크</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root {
-            --primary-color: #0052D4; /* 신뢰감 있는 블루 */
-            --card-bg: #ffffff;
-            --text-main: #1a1a1a;
-            --text-sub: #666666;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            background: #f4f7fa; /* 깔끔한 배경색 */
-            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .auth-card {
-            background: var(--card-bg);
+        .login-container {
+            background: white;
+            border-radius: 30px;
             padding: 50px 40px;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.07);
-            width: 100%;
             max-width: 400px;
-            text-align: center;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         .logo {
-            font-size: 34px;
-            font-weight: 900;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            letter-spacing: -1.5px;
+            text-align: center;
+            margin-bottom: 40px;
         }
 
-        .sub-title {
-            color: var(--text-sub);
-            font-size: 15px;
-            margin-bottom: 40px;
+        .logo-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-top: 5px;
             line-height: 1.5;
         }
 
-        .input-group {
-            margin-bottom: 18px;
-            text-align: left;
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
         }
 
-        label {
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: #f1f2f6;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #95a5a6;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
             display: block;
-            font-size: 13px;
-            font-weight: 700;
             margin-bottom: 8px;
-            color: #333;
-            padding-left: 4px;
+            font-weight: 600;
+            color: #2d3436;
+            font-size: 14px;
         }
 
-        input {
+        .form-input {
             width: 100%;
             padding: 15px;
-            border: 1px solid #e0e0e0;
+            border: 2px solid #dfe6e9;
             border-radius: 12px;
             font-size: 16px;
-            box-sizing: border-box;
+            transition: all 0.3s;
             background: #fcfcfc;
-            transition: all 0.2s ease;
         }
 
-        input:focus {
+        .form-input:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 4px rgba(0, 82, 212, 0.08);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.08);
         }
 
-        .main-btn {
+        .submit-btn {
             width: 100%;
-            padding: 16px;
-            background: var(--primary-color);
-            color: white;
+            padding: 15px;
             border: none;
             border-radius: 12px;
-            font-size: 17px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
+            transition: all 0.3s;
             margin-top: 10px;
-            transition: background 0.2s;
         }
 
-        .main-btn:hover { background: #0041a8; }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
 
-        .toggle-btn {
-            margin-top: 25px;
+        .form-content {
+            display: none;
+        }
+
+        .form-content.active {
+            display: block;
+        }
+
+        .error-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             font-size: 14px;
-            color: #888;
+            display: none;
         }
 
-        .toggle-btn span {
-            color: var(--primary-color);
-            font-weight: 700;
-            cursor: pointer;
-            margin-left: 5px;
+        .error-message.show {
+            display: block;
         }
 
         .divider {
@@ -147,120 +184,220 @@
             cursor: pointer;
             font-size: 15px;
             font-weight: 600;
-            transition: background 0.2s;
+            transition: all 0.3s;
         }
 
-        .google-btn:hover { background: #f9f9f9; }
-
-        .hidden { display: none; }
+        .google-btn:hover { 
+            background: #f9f9f9; 
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
-
-<div class="auth-card">
-    <div class="logo">cashdet</div>
-    <div class="sub-title" id="sub-title">보는 것만으로 돈이 되는<br>광고형 재테크의 시작</div>
-
-    <form id="auth-form">
-        <div class="input-group">
-            <label>이메일</label>
-            <input type="email" id="email" placeholder="email@address.com" required>
+    <div class="login-container">
+        <div class="logo">
+            <div class="logo-icon">💰</div>
+            <div class="logo-text">cashdet</div>
+            <div class="logo-subtitle" id="logo-subtitle">보는 것만으로 돈이 되는<br>광고형 재테크의 시작</div>
         </div>
 
-        <div class="input-group hidden" id="nickname-group">
-            <label>닉네임</label>
-            <input type="text" id="nickname" placeholder="2~10자 한글, 영문, 숫자">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('login')">로그인</button>
+            <button class="tab" onclick="switchTab('signup')">회원가입</button>
         </div>
 
-        <div class="input-group">
-            <label>비밀번호</label>
-            <input type="password" id="password" placeholder="대소문자+특수문자 조합 8~16자" required>
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- 로그인 폼 -->
+        <div class="form-content active" id="loginForm">
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="email@address.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="대소문자+특수문자 조합 8~16자" required>
+                </div>
+                <button type="submit" class="submit-btn">로그인</button>
+            </form>
         </div>
 
-        <button type="submit" id="submit-btn" class="main-btn">로그인</button>
-    </form>
+        <!-- 회원가입 폼 -->
+        <div class="form-content" id="signupForm">
+            <form onsubmit="signup(event)">
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="signupEmail" placeholder="email@address.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">닉네임</label>
+                    <input type="text" class="form-input" id="signupNickname" placeholder="2~10자 한글, 영문, 숫자" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="signupPassword" placeholder="대소문자+특수문자 조합 8~16자" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호 확인</label>
+                    <input type="password" class="form-input" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+                </div>
+                <button type="submit" class="submit-btn">회원가입 시작하기</button>
+            </form>
+        </div>
 
-    <div class="toggle-btn">
-        <span id="toggle-auth">아직 회원이 아니신가요? 회원가입</span>
+        <div class="divider"></div>
+
+        <button type="button" class="google-btn" id="google-login">
+            <img src="https://www.google.com/favicon.ico" width="18"> Google 계정으로 계속하기
+        </button>
     </div>
 
-    <div class="divider"></div>
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <button type="button" class="google-btn" id="google-login">
-        <img src="https://www.google.com/favicon.ico" width="18"> Google 계정으로 계속하기
-    </button>
-</div>
-
-<script>
-    // Supabase 정보
-    const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let isSignUp = false;
-
-    const toggleAuth = document.getElementById('toggle-auth');
-    const subTitle = document.getElementById('sub-title');
-    const nicknameGroup = document.getElementById('nickname-group');
-    const submitBtn = document.getElementById('submit-btn');
-
-    // UI 모드 전환 (로그인 <-> 회원가입)
-    toggleAuth.addEventListener('click', () => {
-        isSignUp = !isSignUp;
-        submitBtn.innerText = isSignUp ? '회원가입 시작하기' : '로그인';
-        subTitle.innerHTML = isSignUp ? '간단한 가입으로<br>지금 바로 수익을 만드세요' : '보는 것만으로 돈이 되는<br>광고형 재테크의 시작';
-        toggleAuth.innerText = isSignUp ? '이미 계정이 있으신가요? 로그인' : '아직 회원이 아니신가요? 회원가입';
-        nicknameGroup.classList.toggle('hidden');
-    });
-
-    // 폼 제출 이벤트
-    document.getElementById('auth-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const nickname = document.getElementById('nickname').value;
-
-        // 정규식 유효성 검사
-        const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
-        const nickRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
-
-        if (!pwRegex.test(password)) {
-            alert("비밀번호 규칙을 확인하세요 (영문 대소문자, 숫자, 특수문자 포함 8~16자).");
-            return;
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('.form-content');
+            const subtitle = document.getElementById('logo-subtitle');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            forms.forEach(f => f.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.add('active');
+                subtitle.innerHTML = '보는 것만으로 돈이 되는<br>광고형 재테크의 시작';
+            } else {
+                document.getElementById('signupForm').classList.add('active');
+                subtitle.innerHTML = '간단한 가입으로<br>지금 바로 수익을 만드세요';
+            }
+            
+            hideError();
         }
 
-        if (isSignUp) {
-            if (!nickRegex.test(nickname)) {
-                alert("닉네임은 공백 없이 2~10자의 한글, 영문, 숫자만 가능합니다.");
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        async function login(event) {
+            event.preventDefault();
+            hideError();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                // Supabase Auth로 로그인
+                const { data, error } = await client.auth.signInWithPassword({ 
+                    email, 
+                    password 
+                });
+
+                if (error) {
+                    showError('이메일 또는 비밀번호가 올바르지 않습니다.');
+                } else {
+                    // 로그인 성공
+                    localStorage.setItem('userId', data.user.id);
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                showError('로그인 중 오류가 발생했습니다.');
+                console.error(error);
+            }
+        }
+
+        async function signup(event) {
+            event.preventDefault();
+            hideError();
+
+            const email = document.getElementById('signupEmail').value;
+            const nickname = document.getElementById('signupNickname').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+            // 정규식 유효성 검사
+            const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+            const nickRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
+
+            if (!pwRegex.test(password)) {
+                showError("비밀번호 규칙을 확인하세요 (영문 대소문자, 숫자, 특수문자 포함 8~16자)");
                 return;
             }
-            const { error } = await client.auth.signUp({
-                email, password, options: { data: { display_name: nickname } }
-            });
-            if (error) alert(error.message);
-            else alert("인증 메일을 보냈습니다. 메일 확인 후 로그인해 주세요!");
-        } else {
-            const { error } = await client.auth.signInWithPassword({ email, password });
-            if (error) alert("이메일 또는 비밀번호가 올바르지 않습니다.");
-            else window.location.href = '/home';
+
+            if (!nickRegex.test(nickname)) {
+                showError("닉네임은 공백 없이 2~10자의 한글, 영문, 숫자만 가능합니다.");
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showError('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            try {
+                // Supabase Auth로 회원가입
+                const { data, error } = await client.auth.signUp({
+                    email, 
+                    password, 
+                    options: { 
+                        data: { 
+                            display_name: nickname 
+                        } 
+                    }
+                });
+
+                if (error) {
+                    showError(error.message);
+                } else {
+                    alert("인증 메일을 보냈습니다. 메일 확인 후 로그인해 주세요!");
+                    // 회원가입 후 로그인 탭으로 전환
+                    document.querySelector('.tab:first-child').click();
+                }
+            } catch (error) {
+                showError('회원가입 중 오류가 발생했습니다.');
+                console.error(error);
+            }
         }
-    });
 
-    // 구글 로그인
-    document.getElementById('google-login').addEventListener('click', async () => {
-        await client.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin + '/home' }
+        // 구글 로그인
+        document.getElementById('google-login').addEventListener('click', async () => {
+            try {
+                const { data, error } = await client.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { 
+                        redirectTo: window.location.origin + '/index.html' 
+                    }
+                });
+                
+                if (error) {
+                    showError('구글 로그인에 실패했습니다.');
+                }
+            } catch (error) {
+                showError('구글 로그인 중 오류가 발생했습니다.');
+                console.error(error);
+            }
         });
-    });
 
-    // 접속 시 로그인 세션 체크
-    async function checkUser() {
-        const { data: { session } } = await client.auth.getSession();
-        if (session) window.location.href = '/home';
-    }
-    checkUser();
-</script>
-
+        // 접속 시 로그인 세션 체크
+        async function checkUser() {
+            const { data: { session } } = await client.auth.getSession();
+            if (session) {
+                localStorage.setItem('userId', session.user.id);
+                window.location.href = 'index.html';
+            }
+        }
+        checkUser();
+    </script>
 </body>
 </html>
