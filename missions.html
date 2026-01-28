@@ -490,56 +490,118 @@
         async function startMission() {
             if (!currentMission) return;
 
-            window.open(currentMission.link, '_blank');
             closeModal();
 
-            setTimeout(async () => {
-                const userId = localStorage.getItem('userId');
-                
-                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        mission_id: currentMission.id,
-                        cash_earned: currentMission.cash_reward
-                    })
-                });
+            let startTime = Date.now();
+            let totalTimeOnPage = 0;
+            let isPageVisible = true;
+            let missionWindow = null;
 
-                const newCash = currentUser.cash + currentMission.cash_reward;
-                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ cash: newCash })
-                });
+            missionWindow = window.open(currentMission.link, '_blank');
 
-                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        message: `"${currentMission.title}" 미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
-                    })
-                });
+            if (!missionWindow) {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+                return;
+            }
 
-                alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
-                location.reload();
-            }, 10000);
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    if (isPageVisible) {
+                        totalTimeOnPage += Date.now() - startTime;
+                        isPageVisible = false;
+                    }
+                } else {
+                    if (!isPageVisible) {
+                        startTime = Date.now();
+                        isPageVisible = true;
+                    }
+                }
+            };
+
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            const checkInterval = setInterval(async () => {
+                let currentTotal = totalTimeOnPage;
+                if (isPageVisible) {
+                    currentTotal += Date.now() - startTime;
+                }
+
+                console.log('체류 시간:', Math.floor(currentTotal / 1000), '초');
+
+                if (currentTotal >= 10000) {
+                    clearInterval(checkInterval);
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+                    const userId = localStorage.getItem('userId');
+                    
+                    try {
+                        const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${currentMission.id}`, {
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`
+                            }
+                        });
+
+                        const existing = await checkResponse.json();
+                        if (existing.length > 0) {
+                            alert('이미 완료한 미션입니다.');
+                            return;
+                        }
+
+                        await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                mission_id: currentMission.id,
+                                cash_earned: currentMission.cash_reward
+                            })
+                        });
+
+                        const newCash = currentUser.cash + currentMission.cash_reward;
+                        await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify({ cash: newCash })
+                        });
+
+                        await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                message: `"${currentMission.title}" 미션 완료! +${currentMission.cash_reward.toLocaleString()} 캐시가 적립되었습니다.`
+                            })
+                        });
+
+                        alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()} 캐시가 적립되었습니다.`);
+                        location.reload();
+                    } catch (error) {
+                        console.error('미션 완료 처리 오류:', error);
+                        alert('미션 완료 처리 중 오류가 발생했습니다.');
+                    }
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, 30000);
         }
     </script>
 </body>
