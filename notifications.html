@@ -419,7 +419,6 @@
                     body: JSON.stringify({ is_read: true })
                 });
 
-                // 로컬 상태 업데이트
                 const notification = allNotifications.find(n => n.id === notificationId);
                 if (notification) {
                     notification.is_read = true;
@@ -449,7 +448,6 @@
                     body: JSON.stringify({ is_read: true })
                 });
 
-                // 로컬 상태 업데이트
                 allNotifications.forEach(n => n.is_read = true);
                 
                 displayNotifications();
