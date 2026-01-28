@@ -422,13 +422,13 @@
             } else {
                 ongoingDiv.innerHTML = ongoing.map(mission => `
                     <div class="mission-card" onclick="openMission('${mission.id}', false)">
-                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
+                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/600x150?text=No+Image'">
                         <div class="mission-info">
                             <div>
                                 <div class="mission-title">${mission.title}</div>
                                 <div class="mission-date">${new Date(mission.created_at).toLocaleDateString('ko-KR')}</div>
                             </div>
-                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()}원</div>
+                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()} 캐시</div>
                         </div>
                     </div>
                 `).join('');
@@ -439,14 +439,14 @@
             } else {
                 completedDiv.innerHTML = completed.map(mission => `
                     <div class="mission-card completed" onclick="openMission('${mission.id}', true)">
-                        <div class="completed-overlay">✓ 완료한 광고입니다</div>
-                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
+                        <div class="completed-overlay">✓ 완료된 미션입니다</div>
+                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/600x150?text=No+Image'">
                         <div class="mission-info">
                             <div>
                                 <div class="mission-title">${mission.title}</div>
                                 <div class="mission-date">${new Date(mission.created_at).toLocaleDateString('ko-KR')}</div>
                             </div>
-                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()}원</div>
+                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()} 캐시</div>
                         </div>
                     </div>
                 `).join('');
@@ -473,7 +473,7 @@
             if (!mission) return;
 
             if (isCompleted) {
-                // 완료한 미션도 다시 볼 수 있게
+                // 완료한 미션도 클릭하면 광고 링크로 이동
                 window.open(mission.link, '_blank');
                 return;
             }
