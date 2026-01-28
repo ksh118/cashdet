@@ -96,11 +96,12 @@
             opacity: 0.8;
         }
 
-        /* 배너 슬라이더 */
+        /* 배너 슬라이더 - 작은 박스 형태 */
         .banner-slider {
             position: relative;
             overflow: hidden;
-            background: #000;
+            padding: 15px 20px;
+            background: #f8f9fa;
         }
 
         .banner-container {
@@ -110,20 +111,23 @@
 
         .banner-slide {
             min-width: 100%;
-            height: 200px;
+            height: 140px;
             position: relative;
+            padding: 0 5px;
         }
 
         .banner-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .banner-indicator {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             background: rgba(0,0,0,0.6);
             color: white;
             padding: 4px 10px;
@@ -134,7 +138,7 @@
 
         .banner-dots {
             position: absolute;
-            bottom: 10px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -736,13 +740,86 @@
         function startMission() {
             if (!currentMission) return;
 
-            const missionWindow = window.open(currentMission.link, '_blank');
             closeModal();
 
-            // 10초 후 미션 완료 처리
-            setTimeout(async () => {
-                const userId = localStorage.getItem('userId');
-                
+            let startTime = Date.now();
+            let totalTimeOnPage = 0;
+            let isPageVisible = true;
+            let missionWindow = null;
+
+            // 새 창 열기
+            missionWindow = window.open(currentMission.link, '_blank');
+
+            if (!missionWindow) {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+                return;
+            }
+
+            // 페이지 가시성 변경 감지
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    // 탭을 떠남 - 시간 기록 중지
+                    if (isPageVisible) {
+                        totalTimeOnPage += Date.now() - startTime;
+                        isPageVisible = false;
+                    }
+                } else {
+                    // 탭으로 돌아옴 - 시간 기록 재개
+                    if (!isPageVisible) {
+                        startTime = Date.now();
+                        isPageVisible = true;
+                    }
+                }
+            };
+
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // 10초 후 검증
+            const checkInterval = setInterval(async () => {
+                // 현재까지 총 체류 시간 계산
+                let currentTotal = totalTimeOnPage;
+                if (isPageVisible) {
+                    currentTotal += Date.now() - startTime;
+                }
+
+                console.log('체류 시간:', Math.floor(currentTotal / 1000), '초');
+
+                if (currentTotal >= 10000) {
+                    // 10초 이상 체류 완료
+                    clearInterval(checkInterval);
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+                    // 미션 완료 처리
+                    await completeMission();
+                }
+            }, 1000);
+
+            // 30초 후 자동 취소 (최대 대기 시간)
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, 30000);
+        }
+
+        // 미션 완료 처리
+        async function completeMission() {
+            const userId = localStorage.getItem('userId');
+            
+            try {
+                // 중복 완료 체크
+                const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${currentMission.id}`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                const existing = await checkResponse.json();
+                if (existing.length > 0) {
+                    alert('이미 완료한 미션입니다.');
+                    return;
+                }
+
                 // 미션 완료 기록
                 await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
                     method: 'POST',
@@ -789,7 +866,10 @@
 
                 alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()} 캐시가 적립되었습니다.`);
                 location.reload();
-            }, 10000);
+            } catch (error) {
+                console.error('미션 완료 처리 오류:', error);
+                alert('미션 완료 처리 중 오류가 발생했습니다.');
+            }
         }
 
         // 알림 로드
