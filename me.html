@@ -134,7 +134,18 @@
         .history-item { padding: 15px; border-bottom: 1px solid #eee; }
         .history-title { font-weight: 600; color: #2d3436; margin-bottom: 5px; }
         .history-amount { color: #27ae60; font-weight: 700; font-size: 18px; margin-bottom: 5px; }
+        .history-amount.negative { color: #e74c3c; }
         .history-date { font-size: 12px; color: #95a5a6; }
+        .category-tag {
+            display: inline-block;
+            background: #e17055;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d3436; }
         .form-input {
@@ -178,7 +189,7 @@
         <div class="header">
             <div class="profile-icon">👤</div>
             <div class="nickname" id="userNickname">사용자</div>
-            <div class="email" id="userEmail">user@example.com</div>
+            <div class="email" id="userEmail">email@example.com</div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
                 <div class="cash-amount"><span id="userCash">0</span> 원</div>
@@ -194,10 +205,10 @@
                 <div class="menu-arrow">›</div>
             </div>
 
-            <div class="menu-item" onclick="location.href='chat.html'">
+            <div class="menu-item" onclick="location.href='inquiry.html'">
                 <div class="menu-left">
                     <div class="menu-icon">💬</div>
-                    <div class="menu-text">문의하기</div>
+                    <div class="menu-text">1:1 문의</div>
                 </div>
                 <div class="menu-arrow">›</div>
             </div>
@@ -205,15 +216,7 @@
             <div class="menu-item" onclick="showReplies()">
                 <div class="menu-left">
                     <div class="menu-icon">💌</div>
-                    <div class="menu-text">답변 확인</div>
-                </div>
-                <div class="menu-arrow">›</div>
-            </div>
-
-            <div class="menu-item" onclick="location.href='my-coupons.html'">
-                <div class="menu-left">
-                    <div class="menu-icon">🎟️</div>
-                    <div class="menu-text">쿠폰함</div>
+                    <div class="menu-text">받은 답변</div>
                 </div>
                 <div class="menu-arrow">›</div>
             </div>
@@ -229,20 +232,7 @@
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
     </div>
-<div class="footer-section" style="padding: 40px 20px; text-align: center; border-top: 1px solid #eee; margin-top: 20px;">
-    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 25px;">
-        <a href="http://www.cashdet.kro.kr/g1.html" target="_blank" style="font-size: 13px; color: #666; text-decoration: none; padding: 5px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff;">이용약관</a>
-        <a href="http://www.cashdet.kro.kr/g2.html" target="_blank" style="font-size: 13px; color: #666; text-decoration: none; padding: 5px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; font-weight: bold;">개인정보 처리방침</a>
-    </div>
 
-    <div style="font-size: 12px; color: #999; line-height: 1.8;">
-        <p><strong>서비스명:</strong> 캐시뎃 (CashDet)</p>
-        <p><strong>운영자:</strong> SE7 | <strong>개인정보 보호책임자:</strong> SE7</p>
-        <p><strong>이메일:</strong> feelbox.gsh@gmail.com</p>
-        <p style="margin-top: 10px; color: #bbb;">본 서비스는 학습 및 테스트 목적으로 운영되는 베타 서비스입니다.</p>
-        <p style="margin-top: 10px;">© 2024 CashDet. All rights reserved.</p>
-    </div>
-</div>
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
             <span class="nav-icon">🏠</span>
@@ -256,17 +246,13 @@
             <span class="nav-icon">🛍️</span>
             상점
         </a>
-        <a href="attendance.html" class="nav-item">
-            <span class="nav-icon">📅</span>
-            출석
-        </a>
         <a href="me.html" class="nav-item active">
             <span class="nav-icon">👤</span>
-            마이
+            MY
         </a>
     </div>
 
-    <!-- 적립내역 모달 -->
+    <!-- 적립 내역 모달 -->
     <div class="modal" id="historyModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -277,7 +263,7 @@
         </div>
     </div>
 
-    <!-- 답변 확인 모달 -->
+    <!-- 받은 답변 모달 -->
     <div class="modal" id="repliesModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -345,25 +331,63 @@
         async function showHistory() {
             const userId = localStorage.getItem('userId');
             
-            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&order=completed_at.desc`, {
+            // 미션 히스토리
+            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&status=eq.completed&order=completed_at.desc`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const missionHistory = await missionsResponse.json();
 
+            // 미션 정보 가져오기
+            const missionIds = [...new Set(missionHistory.map(m => m.mission_id))];
+            let missions = [];
+            if (missionIds.length > 0) {
+                const missionsInfoResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?id=in.(${missionIds.join(',')})`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                missions = await missionsInfoResponse.json();
+            }
+
+            // 출석 히스토리
             const attendanceResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&order=created_at.desc`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const attendanceHistory = await attendanceResponse.json();
 
             const allHistory = [
-                ...missionHistory.map(m => ({ ...m, type: 'mission', date: m.completed_at, title: '미션 완료', amount: m.cash_earned })),
+                ...missionHistory.map(m => {
+                    const mission = missions.find(mi => mi.id === m.mission_id);
+                    const category = mission ? mission.category : '10sec';
+                    const categoryText = category === '10sec' ? '10초' : 
+                                       category === 'quiz' ? '퀴즈' : '설치';
+                    return { 
+                        ...m, 
+                        type: 'mission', 
+                        date: m.completed_at, 
+                        title: '미션 완료', 
+                        amount: m.cash_earned,
+                        category: categoryText
+                    };
+                }),
                 ...attendanceHistory.map(a => {
                     // 상품 구매인 경우
                     if (a.purchase_type === '상품 구매') {
-                        return { ...a, type: 'purchase', date: a.created_at, title: '상품 구매', productName: a.purchase_name, amount: a.reward_amount };
+                        return { 
+                            ...a, 
+                            type: 'purchase', 
+                            date: a.created_at, 
+                            title: '상점 구매', 
+                            productName: a.purchase_name, 
+                            amount: -Math.abs(a.reward_amount)  // 마이너스로 표시
+                        };
                     }
                     // 일반 출석 체크
-                    return { ...a, type: 'attendance', date: a.created_at, title: '출석 체크', amount: a.reward_amount };
+                    return { 
+                        ...a, 
+                        type: 'attendance', 
+                        date: a.created_at, 
+                        title: '출석 체크', 
+                        amount: a.reward_amount 
+                    };
                 })
             ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -377,20 +401,22 @@
                     let title = item.title;
                     let amountClass = 'history-amount';
                     let amountPrefix = '+';
+                    let categoryTag = '';
                     
                     if (item.type === 'mission') {
                         icon = '🎯';
+                        categoryTag = `<span class="category-tag">${item.category}</span>`;
                     } else if (item.type === 'purchase') {
                         icon = '🛍️';
-                        title = `상품 구매 (${item.productName})`;
-                        amountClass = 'history-amount-negative';
-                        amountPrefix = '';
+                        title = `상점 구매 (${item.productName})`;
+                        amountClass = 'history-amount negative';
+                        amountPrefix = '-';
                     }
                     
                     return `
                     <div class="history-item">
-                        <div class="history-title">${icon} ${title}</div>
-                        <div class="${amountClass}" style="${item.type === 'purchase' ? 'color: #e74c3c;' : ''}">${amountPrefix}${item.amount.toLocaleString()}원</div>
+                        <div class="history-title">${icon} ${title}${categoryTag}</div>
+                        <div class="${amountClass}">${amountPrefix}${Math.abs(item.amount).toLocaleString()}원</div>
                         <div class="history-date">${new Date(item.date).toLocaleString('ko-KR')}</div>
                     </div>
                 `}).join('');
@@ -471,15 +497,15 @@
             }
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
         function logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
                 localStorage.removeItem('userId');
                 location.href = 'login.html';
             }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
     </script>
 </body>
