@@ -53,10 +53,7 @@
             transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .menu-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+        .menu-item:hover { transform: translateX(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .menu-left { display: flex; align-items: center; gap: 15px; }
         .menu-icon { font-size: 24px; }
         .menu-text { font-size: 16px; font-weight: 600; color: #2d3436; }
@@ -75,6 +72,7 @@
             transition: all 0.3s;
         }
         .logout-btn:hover { background: #ff3838; transform: translateY(-2px); }
+        
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -96,10 +94,10 @@
             color: #95a5a6;
             text-decoration: none;
             font-size: 12px;
-            transition: all 0.3s;
         }
         .nav-item.active { color: #667eea; }
         .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+        
         .modal {
             display: none;
             position: fixed;
@@ -122,12 +120,7 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title { font-size: 20px; font-weight: 700; color: #2d3436; }
         .close-btn {
             background: #f1f2f6;
@@ -165,10 +158,7 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .save-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+        .save-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
         .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
         .empty-icon { font-size: 48px; margin-bottom: 10px; }
         .reply-item {
@@ -177,34 +167,18 @@
             border-radius: 10px;
             margin-bottom: 10px;
         }
-        .reply-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .reply-subject {
-            font-weight: 600;
-            color: #2d3436;
-        }
-        .reply-date {
-            font-size: 12px;
-            color: #95a5a6;
-        }
-        .reply-content {
-            color: #2d3436;
-            line-height: 1.5;
-        }
+        .reply-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .reply-subject { font-weight: 600; color: #2d3436; }
+        .reply-date { font-size: 12px; color: #95a5a6; }
+        .reply-content { color: #2d3436; line-height: 1.5; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="profile-section">
-                <div class="profile-icon">👤</div>
-                <div class="nickname" id="userNickname">사용자</div>
-                <div class="email" id="userEmail">email@example.com</div>
-            </div>
+            <div class="profile-icon">👤</div>
+            <div class="nickname" id="userNickname">사용자</div>
+            <div class="email" id="userEmail">email@example.com</div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
                 <div class="cash-amount"><span id="userCash">0</span> 원</div>
@@ -332,12 +306,8 @@
         async function loadUserData() {
             const userId = localStorage.getItem('userId');
             const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const users = await response.json();
             if (users.length > 0) {
                 currentUser = users[0];
@@ -350,28 +320,19 @@
         async function showHistory() {
             const userId = localStorage.getItem('userId');
             
-            // 미션 적립 내역
             const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&order=completed_at.desc`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-            const missionHistory = await response.json();
+            const missionHistory = await missionsResponse.json();
 
-            // 출석 적립 내역
             const attendanceResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&order=created_at.desc`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const attendanceHistory = await attendanceResponse.json();
 
-            // 통합 정렬
             const allHistory = [
-                ...missionHistory.map(m => ({ ...m, type: 'mission', date: m.completed_at })),
-                ...attendanceHistory.map(a => ({ ...a, type: 'attendance', date: a.created_at }))
+                ...missionHistory.map(m => ({ ...m, type: 'mission', date: m.completed_at, title: '미션 완료', amount: m.cash_earned })),
+                ...attendanceHistory.map(a => ({ ...a, type: 'attendance', date: a.created_at, title: '출석 체크', amount: a.reward_amount }))
             ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
             const historyList = document.getElementById('historyList');
@@ -381,8 +342,8 @@
             } else {
                 historyList.innerHTML = allHistory.map(item => `
                     <div class="history-item">
-                        <div class="history-title">${item.type === 'attendance' ? '출석 체크' : '미션 완료'}</div>
-                        <div class="history-amount">+${(item.cash_earned || item.reward_amount).toLocaleString()}원</div>
+                        <div class="history-title">${item.type === 'attendance' ? '📅 출석 체크' : '🎯 미션 완료'}</div>
+                        <div class="history-amount">+${item.amount.toLocaleString()}원</div>
                         <div class="history-date">${new Date(item.date).toLocaleString('ko-KR')}</div>
                     </div>
                 `).join('');
@@ -395,12 +356,8 @@
             const userId = localStorage.getItem('userId');
             
             const response = await fetch(`${SUPABASE_URL}/rest/v1/inquiries?user_id=eq.${userId}&status=eq.answered&order=created_at.desc`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const inquiries = await response.json();
             const repliesList = document.getElementById('repliesList');
             
