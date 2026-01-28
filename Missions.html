@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전체 미션 - 캐시뎃</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #eee;
+            position: sticky;
+            top: 80px;
+            z-index: 99;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #95a5a6;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .missions-container {
+            padding: 20px;
+        }
+
+        .mission-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mission-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .mission-card.completed {
+            opacity: 0.7;
+        }
+
+        .completed-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            background: rgba(149, 165, 166, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .mission-banner {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mission-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mission-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .mission-date {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .mission-reward {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .completed-status {
+            color: #27ae60;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+
+        .modal-text {
+            color: #636e72;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .warning-text {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 10px;
+            color: #856404;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #dfe6e9;
+            color: #2d3436;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="location.href='index.html'">‹</button>
+                <div class="page-title">전체 미션</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('ongoing')">진행중</div>
+            <div class="tab" onclick="switchTab('completed')">완료</div>
+        </div>
+
+        <div class="missions-container">
+            <div id="ongoingMissions"></div>
+            <div id="completedMissions" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            홈
+        </a>
+        <a href="missions.html" class="nav-item active">
+            <span class="nav-icon">🎯</span>
+            미션
+        </a>
+        <a href="me.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            마이
+        </a>
+    </div>
+
+    <div class="modal" id="missionModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ 미션 시작 안내</div>
+            <div class="modal-text">
+                광고 사이트에 <strong>10초 이상</strong> 머물러야 합니다.<br>
+                10초 전에 나가면 포인트가 회수됩니다.
+            </div>
+            <div class="warning-text">
+                📹 24시간 모니터링 중
+            </div>
+            <button class="modal-btn btn-primary" onclick="startMission()">확인</button>
+            <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+
+        let currentTab = 'ongoing';
+        let allMissions = [];
+        let completedMissionIds = [];
+        let currentMission = null;
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            await loadUserData();
+            await loadAllMissions();
+        });
+
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const users = await response.json();
+            if (users.length > 0) {
+                currentUser = users[0];
+            }
+        }
+
+        async function loadAllMissions() {
+            const userId = localStorage.getItem('userId');
+
+            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            allMissions = await missionsResponse.json();
+
+            const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const completed = await completedResponse.json();
+            completedMissionIds = completed.map(c => c.mission_id);
+
+            displayMissions();
+        }
+
+        function displayMissions() {
+            const ongoing = allMissions.filter(m => !completedMissionIds.includes(m.id));
+            const completed = allMissions.filter(m => completedMissionIds.includes(m.id));
+
+            const ongoingDiv = document.getElementById('ongoingMissions');
+            const completedDiv = document.getElementById('completedMissions');
+
+            if (ongoing.length === 0) {
+                ongoingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>모든 미션을 완료했습니다!</div></div>';
+            } else {
+                ongoingDiv.innerHTML = ongoing.map(mission => `
+                    <div class="mission-card" onclick="openMission('${mission.id}', false)">
+                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
+                        <div class="mission-info">
+                            <div>
+                                <div class="mission-title">${mission.title}</div>
+                                <div class="mission-date">${new Date(mission.created_at).toLocaleDateString('ko-KR')}</div>
+                            </div>
+                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()}원</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (completed.length === 0) {
+                completedDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>완료한 미션이 없습니다</div></div>';
+            } else {
+                completedDiv.innerHTML = completed.map(mission => `
+                    <div class="mission-card completed" onclick="openMission('${mission.id}', true)">
+                        <div class="completed-overlay">✓ 완료한 광고입니다</div>
+                        <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
+                        <div class="mission-info">
+                            <div>
+                                <div class="mission-title">${mission.title}</div>
+                                <div class="mission-date">${new Date(mission.created_at).toLocaleDateString('ko-KR')}</div>
+                            </div>
+                            <div class="mission-reward">+${mission.cash_reward.toLocaleString()}원</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'ongoing') {
+                document.getElementById('ongoingMissions').style.display = 'block';
+                document.getElementById('completedMissions').style.display = 'none';
+            } else {
+                document.getElementById('ongoingMissions').style.display = 'none';
+                document.getElementById('completedMissions').style.display = 'block';
+            }
+        }
+
+        function openMission(missionId, isCompleted) {
+            const mission = allMissions.find(m => m.id === missionId);
+            if (!mission) return;
+
+            if (isCompleted) {
+                // 완료한 미션도 다시 볼 수 있게
+                window.open(mission.link, '_blank');
+                return;
+            }
+
+            currentMission = mission;
+            document.getElementById('missionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('missionModal').classList.remove('active');
+            currentMission = null;
+        }
+
+        async function startMission() {
+            if (!currentMission) return;
+
+            window.open(currentMission.link, '_blank');
+            closeModal();
+
+            setTimeout(async () => {
+                const userId = localStorage.getItem('userId');
+                
+                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        mission_id: currentMission.id,
+                        cash_earned: currentMission.cash_reward
+                    })
+                });
+
+                const newCash = currentUser.cash + currentMission.cash_reward;
+                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ cash: newCash })
+                });
+
+                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        message: `"${currentMission.title}" 미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
+                    })
+                });
+
+                alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
+                location.reload();
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
