@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고객센터 - 캐시뎃</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+        }
+        .container { max-width: 600px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .header-title { font-size: 20px; font-weight: 700; }
+        .inquiries-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .inquiry-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .inquiry-card:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        .inquiry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .inquiry-subject {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2d3436;
+        }
+        .inquiry-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        .status-answered {
+            background: #81ecec;
+            color: #00b894;
+        }
+        .inquiry-content {
+            color: #636e72;
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .inquiry-date {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .inquiry-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .create-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+        .create-btn:hover {
+            transform: scale(1.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title { font-size: 20px; font-weight: 700; }
+        .close-btn {
+            background: #f1f2f6;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d3436; }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: #667eea; }
+        .file-input-wrapper {
+            border: 2px dashed #dfe6e9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-input-wrapper:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        .file-input-wrapper input {
+            display: none;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .empty-state { text-align: center; padding: 60px 20px; color: #95a5a6; }
+        .empty-icon { font-size: 64px; margin-bottom: 15px; }
+        .reply-section {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .reply-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .reply-content {
+            color: #2d3436;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">←</button>
+            <div class="header-title">고객센터</div>
+        </div>
+
+        <div class="inquiries-list" id="inquiriesList">
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <div>문의 내역이 없습니다</div>
+                <div style="font-size: 14px; margin-top: 10px;">아래 + 버튼을 눌러 문의하세요</div>
+            </div>
+        </div>
+
+        <button class="create-btn" onclick="showCreateModal()">+</button>
+    </div>
+
+    <!-- 문의 작성 모달 -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">1:1 문의하기</div>
+                <button class="close-btn" onclick="closeModal('createModal')">×</button>
+            </div>
+            <form onsubmit="submitInquiry(event)">
+                <div class="form-group">
+                    <label class="form-label">제목</label>
+                    <input type="text" class="form-input" id="inquirySubject" required placeholder="문의 제목을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">내용</label>
+                    <textarea class="form-textarea" id="inquiryContent" required placeholder="문의 내용을 자세히 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">사진 첨부 (선택)</label>
+                    <label class="file-input-wrapper" for="inquiryImage">
+                        <div>📷 사진 선택하기</div>
+                        <div style="font-size: 12px; color: #95a5a6; margin-top: 5px;">클릭하여 이미지를 업로드하세요</div>
+                        <input type="file" id="inquiryImage" accept="image/*" onchange="previewImage(event)">
+                        <img id="imagePreview" class="preview-image" style="display: none;">
+                    </label>
+                </div>
+                <button type="submit" class="submit-btn">문의 보내기</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 문의 상세 모달 -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">문의 내역</div>
+                <button class="close-btn" onclick="closeModal('detailModal')">×</button>
+            </div>
+            <div id="inquiryDetail"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+
+        let currentUser = null;
+        let selectedImage = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+            await loadUserData();
+            await loadInquiries();
+        });
+
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            const users = await response.json();
+            if (users.length > 0) {
+                currentUser = users[0];
+            }
+        }
+
+        async function loadInquiries() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/inquiries?user_id=eq.${userId}&order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const inquiries = await response.json();
+            const list = document.getElementById('inquiriesList');
+
+            if (inquiries.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>문의 내역이 없습니다</div><div style="font-size: 14px; margin-top: 10px;">아래 + 버튼을 눌러 문의하세요</div></div>';
+                return;
+            }
+
+            list.innerHTML = inquiries.map(inquiry => `
+                <div class="inquiry-card" onclick="showDetail('${inquiry.id}')">
+                    <div class="inquiry-header">
+                        <div class="inquiry-subject">${inquiry.subject}</div>
+                        <div class="inquiry-status ${inquiry.status === 'answered' ? 'status-answered' : 'status-pending'}">
+                            ${inquiry.status === 'answered' ? '답변 완료' : '대기 중'}
+                        </div>
+                    </div>
+                    <div class="inquiry-content">${inquiry.content}</div>
+                    ${inquiry.image_url ? `<img src="${inquiry.image_url}" class="inquiry-image">` : ''}
+                    <div class="inquiry-date">${new Date(inquiry.created_at).toLocaleString('ko-KR')}</div>
+                </div>
+            `).join('');
+        }
+
+        async function showDetail(inquiryId) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/inquiries?id=eq.${inquiryId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const inquiries = await response.json();
+            if (inquiries.length === 0) return;
+
+            const inquiry = inquiries[0];
+            const detail = document.getElementById('inquiryDetail');
+
+            detail.innerHTML = `
+                <div>
+                    <div class="form-label">제목</div>
+                    <div style="padding: 10px 0; color: #2d3436; font-weight: 600;">${inquiry.subject}</div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <div class="form-label">내용</div>
+                    <div style="padding: 10px 0; color: #2d3436; line-height: 1.6;">${inquiry.content}</div>
+                </div>
+                ${inquiry.image_url ? `
+                    <div style="margin-top: 20px;">
+                        <div class="form-label">첨부 이미지</div>
+                        <img src="${inquiry.image_url}" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">
+                    </div>
+                ` : ''}
+                <div style="margin-top: 20px;">
+                    <div class="form-label">문의 일시</div>
+                    <div style="padding: 10px 0; color: #95a5a6;">${new Date(inquiry.created_at).toLocaleString('ko-KR')}</div>
+                </div>
+                ${inquiry.status === 'answered' ? `
+                    <div class="reply-section">
+                        <div class="reply-label">✉️ 관리자 답변</div>
+                        <div class="reply-content">${inquiry.reply_message}</div>
+                        <div style="font-size: 12px; color: #95a5a6; margin-top: 10px;">
+                            ${new Date(inquiry.replied_at).toLocaleString('ko-KR')}
+                        </div>
+                    </div>
+                ` : '<div class="reply-section"><div class="reply-label">⏳ 답변 대기 중</div><div style="color: #95a5a6; font-size: 14px;">관리자가 확인 후 답변드리겠습니다</div></div>'}
+            `;
+
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function showCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'createModal') {
+                document.getElementById('inquirySubject').value = '';
+                document.getElementById('inquiryContent').value = '';
+                document.getElementById('inquiryImage').value = '';
+                document.getElementById('imagePreview').style.display = 'none';
+                selectedImage = null;
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedImage = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function submitInquiry(event) {
+            event.preventDefault();
+
+            const subject = document.getElementById('inquirySubject').value;
+            const content = document.getElementById('inquiryContent').value;
+
+            const userId = localStorage.getItem('userId');
+
+            const inquiryData = {
+                user_id: userId,
+                user_nickname: currentUser.nickname,
+                subject: subject,
+                content: content,
+                status: 'pending'
+            };
+
+            if (selectedImage) {
+                inquiryData.image_url = selectedImage;
+            }
+
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/inquiries`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(inquiryData)
+            });
+
+            if (response.ok) {
+                // 알림 생성
+                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        type: 'inquiry',
+                        message: `문의가 전송되었습니다. "${subject}"`
+                    })
+                });
+
+                alert('문의가 전송되었습니다.');
+                closeModal('createModal');
+                await loadInquiries();
+            } else {
+                alert('문의 전송에 실패했습니다.');
+            }
+        }
+    </script>
+</body>
+</html>
