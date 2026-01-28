@@ -3,686 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>캐시뎃 - 광고 보고 적립하기</title>
+    <title>캐시뎃 - 보는 것만으로 수익 창출</title>
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.95);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-            padding-bottom: 80px;
+            background: #f0f2f5;
+            color: #1a1a1a;
+            padding-bottom: 90px;
         }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; min-height: 100vh; position: relative; }
+        
+        /* 헤더 디자인 개선 */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             color: white;
-            padding: 15px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px 20px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
         }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .user-greeting { font-size: 16px; font-weight: 600; }
-        .cash-info { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-        .cash-amount { font-size: 20px; font-weight: 700; }
+        .user-info { display: flex; justify-content: space-between; align-items: flex-end; }
+        .greeting { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .cash-display { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+        .cash-unit { font-size: 18px; font-weight: 400; margin-left: 2px; }
 
-        /* 배너 슬라이더 */
+        /* 배너 슬라이더 슬림화 */
+        .banner-section { padding: 20px; margin-top: -10px; }
         .banner-slider {
-            position: relative;
+            border-radius: 20px;
             overflow: hidden;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            user-select: none;
-        }
-        .banner-container {
-            display: flex;
-            transition: transform 0.3s ease;
-            cursor: grab;
-        }
-        .banner-container:active { cursor: grabbing; }
-        .banner-slide {
-            min-width: 100%;
-            height: 140px;
             position: relative;
-            padding: 0 5px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
-        .banner-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            pointer-events: none;
-        }
-        .banner-indicator {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            pointer-events: none;
-        }
-        .banner-dots {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 6px;
-        }
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.5);
-            cursor: pointer;
-        }
-        .dot.active {
-            background: white;
-            width: 20px;
-            border-radius: 3px;
-        }
+        .banner-container { display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .banner-slide { min-width: 100%; height: 160px; }
+        .banner-image { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 출석 보상 */
-        .attendance-section { padding: 20px; background: white; }
-        .attendance-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 16px;
-            padding: 20px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        /* 미션 섹션 디자인 업그레이드 */
+        .missions-section { padding: 10px 20px; }
+        .section-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; padding: 0 5px;
         }
-        .attendance-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .attendance-title { font-size: 18px; font-weight: 700; }
-        .attendance-reward {
-            background: rgba(255,255,255,0.3);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-        .attendance-btn {
-            background: white;
-            color: #f5576c;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .attendance-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .attendance-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .attendance-timer { text-align: center; margin-top: 10px; font-size: 14px; opacity: 0.9; }
+        .section-title { font-size: 20px; font-weight: 700; color: #333; }
+        .view-all { color: #667eea; text-decoration: none; font-size: 14px; font-weight: 600; }
 
-        /* 미션 섹션 */
-        .missions-section { padding: 20px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .section-title { font-size: 18px; font-weight: 700; color: #2d3436; }
-        .view-all-btn { color: #667eea; text-decoration: none; font-weight: 600; font-size: 14px; }
-
-        /* 가로형 미션 카드 */
         .mission-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        .mission-card:hover { transform: translateX(3px); background: #e9ecef; }
-        .mission-thumbnail {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        .mission-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .mission-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #2d3436;
-            margin-bottom: 4px;
-        }
-        .mission-description { font-size: 12px; color: #95a5a6; margin-bottom: 8px; }
-        .mission-footer { display: flex; justify-content: space-between; align-items: center; }
-        .mission-reward-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        /* 하단 네비게이션 */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 600px;
-            width: 100%;
-            background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 100;
-        }
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            color: #95a5a6;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        .nav-item.active { color: #667eea; }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
-
-        /* 모달 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white;
+            background: #fff;
             border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-        .modal-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2d3436;
-            margin-bottom: 10px;
-        }
-        .modal-description {
-            color: #636e72;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .modal-reward {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
             padding: 15px;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .modal-buttons {
+            margin-bottom: 15px;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
         }
-        .modal-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
+        .mission-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #667eea; }
+        .mission-img { width: 70px; height: 70px; border-radius: 15px; object-fit: cover; }
+        .mission-info { flex: 1; }
+        .mission-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; color: #2d3436; }
+        .mission-tag { font-size: 12px; color: #95a5a6; display: flex; align-items: center; gap: 4px; }
+        .reward-badge {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 8px 15px;
             border-radius: 12px;
-            font-size: 16px;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
+            font-size: 14px;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #f1f2f6;
-            color: #2d3436;
-        }
-        .btn-secondary:hover { background: #dfe6e9; }
 
-        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
-        .empty-icon { font-size: 48px; margin-bottom: 10px; }
+        /* 하단 네비게이션 애니메이션 */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            max-width: 600px; width: 100%; background: var(--glass);
+            backdrop-filter: blur(10px); display: flex; padding: 12px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-radius: 25px 25px 0 0;
+        }
+        .nav-item { flex: 1; text-align: center; text-decoration: none; color: #bdc3c7; transition: 0.3s; }
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+        .nav-label { font-size: 11px; font-weight: 600; }
+
+        /* 푸터 정보 */
+        .footer {
+            padding: 40px 20px; text-align: center; background: #f9f9f9;
+            font-size: 12px; color: #999; line-height: 1.8;
+        }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; }
+        .footer-links a { color: #666; text-decoration: none; border: 1px solid #ddd; padding: 4px 10px; border-radius: 15px; }
+
+        .empty-box { text-align: center; padding: 50px 0; color: #bdc3c7; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-top">
-                <div class="user-greeting">안녕하세요! 👋</div>
-            </div>
-            <div class="cash-info">
-                <div class="cash-amount"><span id="userCash">0</span>원</div>
-                <div class="cash-label">보유 캐시</div>
-            </div>
-        </div>
-
-        <div class="banner-slider">
-            <div class="banner-container" id="bannerContainer"></div>
-            <div class="banner-indicator" id="bannerIndicator">1 / 1</div>
-            <div class="banner-dots" id="bannerDots"></div>
-        </div>
-
-        <div class="attendance-section">
-            <div class="attendance-card">
-                <div class="attendance-header">
-                    <div class="attendance-title">🎁 출석 체크</div>
-                    <div class="attendance-reward" id="attendanceReward">+10원</div>
+            <div class="user-info">
+                <div>
+                    <div class="greeting">반가워요! 오늘의 수익을 확인하세요</div>
+                    <div class="cash-display"><span id="userCash">0</span><span class="cash-unit">원</span></div>
                 </div>
-                <button class="attendance-btn" id="attendanceBtn" onclick="checkAttendance()">출석하기</button>
-                <div class="attendance-timer" id="attendanceTimer"></div>
+                <div style="font-size: 24px;">💎</div>
+            </div>
+        </div>
+
+        <div class="banner-section">
+            <div class="banner-slider">
+                <div class="banner-container" id="bannerContainer"></div>
             </div>
         </div>
 
         <div class="missions-section">
             <div class="section-header">
-                <div class="section-title">🎯 오늘의 미션</div>
-                <a href="missions.html" class="view-all-btn">전체보기 ›</a>
+                <div class="section-title">실시간 미션 🔥</div>
+                <a href="missions.html" class="view-all">전체보기</a>
             </div>
             <div id="missionsList"></div>
         </div>
-    </div>
 
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <span class="nav-icon">🏠</span>
-            홈
-        </a>
-        <a href="missions.html" class="nav-item">
-            <span class="nav-icon">🎯</span>
-            미션
-        </a>
-        <a href="shop.html" class="nav-item">
-            <span class="nav-icon">🛍️</span>
-            상점
-        </a>
-        <a href="attendance.html" class="nav-item">
-            <span class="nav-icon">📅</span>
-            출석
-        </a>
-        <a href="me.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            마이
-        </a>
-    </div>
-
-    <!-- 미션 안내 모달 -->
-    <div class="modal" id="missionModal">
-        <div class="modal-content">
-            <div class="modal-icon">🎯</div>
-            <div class="modal-title" id="modalMissionTitle">미션을 시작하시겠습니까?</div>
-            <div class="modal-reward" id="modalMissionReward">+0원</div>
-            <div class="modal-description">
-                ⏱️ <strong>광고를 10초 이상 시청</strong>해주세요!<br><br>
-                시작 버튼을 누르면 광고 페이지가 새 탭으로 열립니다.<br>
-                <strong>10초 후 자동으로 보상이 지급됩니다.</strong>
+        <div class="footer">
+            <div class="footer-links">
+                <a href="http://www.cashdet.kro.kr/g1.html" target="_blank">이용약관</a>
+                <a href="http://www.cashdet.kro.kr/g2.html" target="_blank" style="font-weight: bold;">개인정보 처리방침</a>
             </div>
-            <div class="modal-buttons">
-                <button class="modal-btn btn-primary" onclick="startMission()">시작하기</button>
-                <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
-            </div>
+            <p><strong>서비스명:</strong> 캐시뎃 (CashDet)</p>
+            <p>운영자/보호책임자: SE7 | feelbox.gsh@gmail.com</p>
+            <p style="margin-top: 8px; color: #ccc;">본 서비스는 학습 및 테스트 목적으로 운영되는 베타 서비스입니다.</p>
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></a>
+        <a href="missions.html" class="nav-item"><span class="nav-icon">🎯</span><span class="nav-label">미션</span></a>
+        <a href="shop.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">상점</span></a>
+        <a href="attendance.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">출석</span></a>
+        <a href="me.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">마이</span></a>
+    </nav>
 
-        let currentUser = null;
-        let currentMission = null;
-        let currentBannerIndex = 0;
-        let banners = [];
-        let bannerInterval = null;
-        let touchStartX = 0;
-        let touchEndX = 0;
+    <script>
+        const S_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
         document.addEventListener('DOMContentLoaded', async () => {
             const userId = localStorage.getItem('userId');
-            if (!userId) {
-                location.href = 'login.html';
-                return;
-            }
-
-            await loadUserData();
-            await loadHomeBanners();
-            await loadMissions();
-            await checkAttendanceStatus();
-            updateAttendanceTimer();
-            setInterval(updateAttendanceTimer, 1000);
+            if (!userId) return location.href = 'login.html';
+            
+            loadUserData(userId);
+            loadBanners();
+            loadMissions(userId);
         });
 
-        async function loadUserData() {
-            const userId = localStorage.getItem('userId');
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const users = await response.json();
-            if (users.length > 0) {
-                currentUser = users[0];
-                document.getElementById('userCash').textContent = currentUser.cash.toLocaleString();
-            }
+        async function loadUserData(userId) {
+            const res = await fetch(`${S_URL}/rest/v1/users?id=eq.${userId}`, { headers: { 'apikey': S_KEY } });
+            const data = await res.json();
+            if (data[0]) document.getElementById('userCash').innerText = data[0].cash.toLocaleString();
         }
 
-        async function loadHomeBanners() {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/home_banners?is_active=eq.true&order=created_at.desc`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            banners = await response.json();
-            
-            if (banners.length === 0) {
-                document.getElementById('bannerContainer').innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">배너가 없습니다</div>';
-                return;
-            }
-
+        async function loadBanners() {
+            const res = await fetch(`${S_URL}/rest/v1/home_banners?is_active=eq.true`, { headers: { 'apikey': S_KEY } });
+            const data = await res.json();
             const container = document.getElementById('bannerContainer');
-            container.innerHTML = banners.map(banner => `
-                <div class="banner-slide">
-                    <img src="${banner.image_url}" class="banner-image" alt="배너">
-                </div>
-            `).join('');
-
-            const dots = document.getElementById('bannerDots');
-            dots.innerHTML = banners.map((_, i) => 
-                `<div class="dot ${i === 0 ? 'active' : ''}" onclick="goToBanner(${i})"></div>`
-            ).join('');
-
-            updateBannerIndicator();
-            setupBannerSwipe();
-
-            if (banners.length > 1) {
-                bannerInterval = setInterval(nextBanner, 5000);
+            if (data.length > 0) {
+                container.innerHTML = data.map(b => `<div class="banner-slide"><img src="${b.image_url}" class="banner-image"></div>`).join('');
+                // 자동 슬라이드 로직 (간단히)
+                let idx = 0;
+                setInterval(() => {
+                    idx = (idx + 1) % data.length;
+                    container.style.transform = `translateX(-${idx * 100}%)`;
+                }, 4000);
             }
         }
 
-        function setupBannerSwipe() {
-            const container = document.getElementById('bannerContainer');
+        async function loadMissions(userId) {
+            const resM = await fetch(`${S_URL}/rest/v1/missions?is_active=eq.true&limit=4`, { headers: { 'apikey': S_KEY } });
+            const missions = await resM.json();
             
-            container.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-                clearInterval(bannerInterval);
-            });
-
-            container.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-                if (banners.length > 1) {
-                    bannerInterval = setInterval(nextBanner, 5000);
-                }
-            });
-
-            container.addEventListener('mousedown', (e) => {
-                touchStartX = e.screenX;
-                clearInterval(bannerInterval);
-            });
-
-            container.addEventListener('mouseup', (e) => {
-                touchEndX = e.screenX;
-                handleSwipe();
-                if (banners.length > 1) {
-                    bannerInterval = setInterval(nextBanner, 5000);
-                }
-            });
-        }
-
-        function handleSwipe() {
-            const diff = touchStartX - touchEndX;
-            if (Math.abs(diff) > 50) {
-                if (diff > 0) {
-                    nextBanner();
-                } else {
-                    prevBanner();
-                }
-            }
-        }
-
-        function nextBanner() {
-            currentBannerIndex = (currentBannerIndex + 1) % banners.length;
-            updateBannerSlider();
-        }
-
-        function prevBanner() {
-            currentBannerIndex = (currentBannerIndex - 1 + banners.length) % banners.length;
-            updateBannerSlider();
-        }
-
-        function goToBanner(index) {
-            currentBannerIndex = index;
-            updateBannerSlider();
-            clearInterval(bannerInterval);
-            if (banners.length > 1) {
-                bannerInterval = setInterval(nextBanner, 5000);
-            }
-        }
-
-        function updateBannerSlider() {
-            const container = document.getElementById('bannerContainer');
-            container.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
-            
-            document.querySelectorAll('.dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentBannerIndex);
-            });
-            updateBannerIndicator();
-        }
-
-        function updateBannerIndicator() {
-            document.getElementById('bannerIndicator').textContent = `${currentBannerIndex + 1} / ${banners.length}`;
-        }
-
-        async function checkAttendanceStatus() {
-            const userId = localStorage.getItem('userId');
-            const today = new Date().toISOString().split('T')[0];
-            
-            const settingsResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const settings = await settingsResponse.json();
-            const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
-            document.getElementById('attendanceReward').textContent = `+${rewardAmount}원`;
-            
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&date=eq.${today}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const attendance = await response.json();
-            const btn = document.getElementById('attendanceBtn');
-            
-            if (attendance.length > 0) {
-                btn.disabled = true;
-                btn.textContent = '출석 완료 ✓';
-            }
-        }
-
-        async function checkAttendance() {
-            const userId = localStorage.getItem('userId');
-            const today = new Date().toISOString().split('T')[0];
-
-            const settingsResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const settings = await settingsResponse.json();
-            const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
-
-            try {
-                await fetch(`${SUPABASE_URL}/rest/v1/attendance`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        date: today,
-                        reward_amount: rewardAmount
-                    })
-                });
-
-                const newCash = currentUser.cash + rewardAmount;
-                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ cash: newCash })
-                });
-
-                // 알림 생성
-                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        type: 'attendance',
-                        message: `🎁 출석 체크 완료! +${rewardAmount}원이 적립되었습니다.`,
-                        is_read: false
-                    })
-                });
-
-                alert(`출석 완료! +${rewardAmount}원이 적립되었습니다.`);
-                location.reload();
-            } catch (error) {
-                console.error('출석 체크 오류:', error);
-                alert('출석 체크 중 오류가 발생했습니다.');
-            }
-        }
-
-        function updateAttendanceTimer() {
-            const now = new Date();
-            const midnight = new Date();
-            midnight.setHours(24, 0, 0, 0);
-            
-            const diff = midnight - now;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            const timer = document.getElementById('attendanceTimer');
-            if (timer && document.getElementById('attendanceBtn').disabled) {
-                timer.textContent = `다음 출석까지 ${hours}시간 ${minutes}분 ${seconds}초`;
-            } else if (timer) {
-                timer.textContent = '';
-            }
-        }
-
-        async function loadMissions() {
-            const userId = localStorage.getItem('userId');
-            
-            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc&limit=5`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const missions = await missionsResponse.json();
-
-            const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const completed = await completedResponse.json();
+            const resC = await fetch(`${S_URL}/rest/v1/user_missions?user_id=eq.${userId}`, { headers: { 'apikey': S_KEY } });
+            const completed = await resC.json();
             const completedIds = completed.map(c => c.mission_id);
 
-            const missionsList = document.getElementById('missionsList');
-            
-            const availableMissions = missions.filter(m => !completedIds.includes(m.id));
-            
-            if (availableMissions.length === 0) {
-                missionsList.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>모든 미션을 완료했습니다!</div></div>';
-                return;
-            }
+            const list = document.getElementById('missionsList');
+            const available = missions.filter(m => !completedIds.includes(m.id));
 
-            missionsList.innerHTML = availableMissions.map(mission => {
-                return `
-                    <div class="mission-card" onclick="openMission('${mission.id}')">
-                        <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
-                        <div class="mission-content">
-                            <div>
-                                <div class="mission-title">${mission.title}</div>
-                                <div class="mission-description">10초 시청 후 보상 지급</div>
-                            </div>
-                            <div class="mission-footer">
-                                <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
-                            </div>
+            if (available.length === 0) {
+                list.innerHTML = '<div class="empty-box">현재 참여 가능한 미션이 없어요 💨</div>';
+            } else {
+                list.innerHTML = available.map(m => `
+                    <div class="mission-card" onclick="location.href='missions.html?id=${m.id}'">
+                        <img src="${m.banner_url}" class="mission-img">
+                        <div class="mission-info">
+                            <div class="mission-name">${m.title}</div>
+                            <div class="mission-tag">⏱ 10초 시청하고 적립</div>
                         </div>
+                        <div class="reward-badge">+${m.cash_reward}원</div>
                     </div>
-                `;
-            }).join('');
-        }
-
-        async function openMission(missionId) {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/missions?id=eq.${missionId}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const missions = await response.json();
-            
-            if (missions.length > 0) {
-                currentMission = missions[0];
-                document.getElementById('modalMissionTitle').textContent = currentMission.title;
-                document.getElementById('modalMissionReward').textContent = `+${currentMission.cash_reward.toLocaleString()}원`;
-                document.getElementById('missionModal').classList.add('active');
+                `).join('');
             }
-        }
-
-        function closeModal() {
-            document.getElementById('missionModal').classList.remove('active');
-            currentMission = null;
-        }
-
-        async function startMission() {
-            if (!currentMission) return;
-
-            const userId = localStorage.getItem('userId');
-            
-            // 이미 완료했는지 체크
-            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${currentMission.id}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const existing = await checkResponse.json();
-            
-            if (existing.length > 0) {
-                alert('이미 완료한 미션입니다.');
-                closeModal();
-                return;
-            }
-
-            // 미션 ID를 로컬스토리지에 저장하고 missions.html로 이동
-            localStorage.setItem('selectedMissionId', currentMission.id);
-            location.href = 'missions.html';
         }
     </script>
 </body>
