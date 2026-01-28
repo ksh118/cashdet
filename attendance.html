@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석 체크 - 캐시뎃</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            padding-bottom: 80px;
+        }
+        .container { max-width: 600px; margin: 0 auto; background: white; min-height: 100vh; }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+        }
+        .header-content { display: flex; align-items: center; gap: 15px; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .page-title { font-size: 22px; font-weight: 700; }
+        
+        .attendance-main {
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .attendance-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .attendance-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+        .attendance-subtitle {
+            color: #95a5a6;
+            margin-bottom: 30px;
+        }
+        .attendance-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .reward-amount {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .reward-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .attendance-btn {
+            background: white;
+            color: #f5576c;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .attendance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .attendance-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .timer-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .timer-title {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-bottom: 10px;
+        }
+        .timer-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+        .history-section {
+            padding: 20px;
+        }
+        .history-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-date {
+            font-size: 14px;
+            color: #2d3436;
+        }
+        .history-reward {
+            font-size: 16px;
+            font-weight: 700;
+            color: #27ae60;
+        }
+        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
+        .empty-icon { font-size: 48px; margin-bottom: 10px; }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <div class="page-title">출석 체크</div>
+            </div>
+        </div>
+
+        <div class="attendance-main">
+            <div class="attendance-icon">🎁</div>
+            <div class="attendance-title">매일 출석하고 보상 받기</div>
+            <div class="attendance-subtitle">매일 자정에 초기화됩니다</div>
+
+            <div class="attendance-card">
+                <div class="reward-amount" id="rewardAmount">+10원</div>
+                <div class="reward-label">오늘의 출석 보상</div>
+            </div>
+
+            <button class="attendance-btn" id="attendanceBtn" onclick="checkAttendance()">
+                출석하기
+            </button>
+
+            <div class="timer-box" id="timerBox">
+                <div class="timer-title">다음 출석까지</div>
+                <div class="timer-value" id="timerValue">--:--:--</div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">📅 출석 내역</div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            홈
+        </a>
+        <a href="missions.html" class="nav-item">
+            <span class="nav-icon">🎯</span>
+            미션
+        </a>
+        <a href="attendance.html" class="nav-item active">
+            <span class="nav-icon">📅</span>
+            출석
+        </a>
+        <a href="me.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            마이
+        </a>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            await loadUserData();
+            await loadAttendanceSettings();
+            await checkAttendanceStatus();
+            await loadAttendanceHistory();
+            
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        });
+
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const users = await response.json();
+            if (users.length > 0) {
+                currentUser = users[0];
+            }
+        }
+
+        async function loadAttendanceSettings() {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const settings = await response.json();
+            const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
+            document.getElementById('rewardAmount').textContent = `+${rewardAmount}원`;
+        }
+
+        async function checkAttendanceStatus() {
+            const userId = localStorage.getItem('userId');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&date=eq.${today}`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const attendance = await response.json();
+            const btn = document.getElementById('attendanceBtn');
+            
+            if (attendance.length > 0) {
+                btn.disabled = true;
+                btn.textContent = '출석 완료 ✓';
+                document.getElementById('timerBox').style.display = 'block';
+            } else {
+                document.getElementById('timerBox').style.display = 'none';
+            }
+        }
+
+        async function checkAttendance() {
+            const userId = localStorage.getItem('userId');
+            const today = new Date().toISOString().split('T')[0];
+
+            const settingsResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const settings = await settingsResponse.json();
+            const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
+
+            await fetch(`${SUPABASE_URL}/rest/v1/attendance`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    date: today,
+                    reward_amount: rewardAmount
+                })
+            });
+
+            const newCash = currentUser.cash + rewardAmount;
+            await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ cash: newCash })
+            });
+
+            await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    type: 'attendance',
+                    message: `출석 체크 완료! +${rewardAmount}원이 적립되었습니다.`
+                })
+            });
+
+            alert(`출석 완료! +${rewardAmount}원이 적립되었습니다.`);
+            location.reload();
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setHours(24, 0, 0, 0);
+            
+            const diff = midnight - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('timerValue').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        async function loadAttendanceHistory() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&order=created_at.desc&limit=30`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const history = await response.json();
+            const list = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div>출석 내역이 없습니다</div></div>';
+                return;
+            }
+
+            list.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-date">${new Date(item.date).toLocaleDateString('ko-KR')}</div>
+                    <div class="history-reward">+${item.reward_amount.toLocaleString()}원</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
