@@ -312,7 +312,7 @@
             </div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
-                <div class="cash-amount"><span id="userCash">0</span> 원</div>
+                <div class="cash-amount"><span id="userCash">0</span> 캐시</div>
             </div>
         </div>
 
@@ -458,7 +458,7 @@
                         return `
                             <div class="history-item">
                                 <div class="history-title">${mission ? mission.title : '미션'}</div>
-                                <div class="history-amount">+${item.cash_earned.toLocaleString()}원</div>
+                                <div class="history-amount">+${item.cash_earned.toLocaleString()}캐시</div>
                                 <div class="history-date">${new Date(item.completed_at).toLocaleString('ko-KR')}</div>
                             </div>
                         `;
