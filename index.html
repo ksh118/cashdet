@@ -5,27 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>캐시뎃 - 광고 보고 적립하기</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8f9fa;
             min-height: 100vh;
             padding-bottom: 80px;
         }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            min-height: 100vh;
-        }
-
-        /* 헤더 */
+        .container { max-width: 600px; margin: 0 auto; background: #fff; min-height: 100vh; }
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -35,18 +22,8 @@
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-greeting {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .user-greeting { font-size: 16px; font-weight: 600; }
         .notification-btn {
             position: relative;
             background: rgba(255,255,255,0.2);
@@ -56,64 +33,50 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 18px;
+            color: white;
         }
-
         .notification-badge {
             display: none;
             position: absolute;
             top: 0;
             right: 0;
             background: #ff4757;
-            color: white;
-            border-radius: 50%;
             width: 8px;
             height: 8px;
+            border-radius: 50%;
         }
+        .notification-badge.active { display: block; }
+        .cash-info { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .cash-amount { font-size: 20px; font-weight: 700; }
 
-        .notification-badge.active {
-            display: block;
-        }
-
-        .cash-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .cash-amount {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        /* 홈 배너 슬라이더 */
+        /* 배너 슬라이더 - 스와이프 가능 */
         .banner-slider {
             position: relative;
             overflow: hidden;
             padding: 15px 20px;
             background: #f8f9fa;
+            user-select: none;
         }
-
         .banner-container {
             display: flex;
             transition: transform 0.3s ease;
+            cursor: grab;
         }
-
+        .banner-container:active { cursor: grabbing; }
         .banner-slide {
             min-width: 100%;
             height: 140px;
             position: relative;
             padding: 0 5px;
         }
-
         .banner-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            pointer-events: none;
         }
-
         .banner-indicator {
             position: absolute;
             top: 15px;
@@ -124,8 +87,8 @@
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            pointer-events: none;
         }
-
         .banner-dots {
             position: absolute;
             bottom: 15px;
@@ -134,7 +97,6 @@
             display: flex;
             gap: 6px;
         }
-
         .dot {
             width: 6px;
             height: 6px;
@@ -142,19 +104,14 @@
             background: rgba(255,255,255,0.5);
             cursor: pointer;
         }
-
         .dot.active {
             background: white;
             width: 20px;
             border-radius: 3px;
         }
 
-        /* 출석 보상 섹션 */
-        .attendance-section {
-            padding: 20px;
-            background: white;
-        }
-
+        /* 출석 보상 */
+        .attendance-section { padding: 20px; background: white; }
         .attendance-card {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border-radius: 16px;
@@ -162,19 +119,8 @@
             color: white;
             box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
         }
-
-        .attendance-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .attendance-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
+        .attendance-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .attendance-title { font-size: 18px; font-weight: 700; }
         .attendance-reward {
             background: rgba(255,255,255,0.3);
             padding: 6px 12px;
@@ -182,7 +128,6 @@
             font-size: 14px;
             font-weight: 700;
         }
-
         .attendance-btn {
             background: white;
             color: #f5576c;
@@ -195,90 +140,68 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
-        .attendance-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .attendance-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .attendance-timer {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
+        .attendance-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .attendance-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .attendance-timer { text-align: center; margin-top: 10px; font-size: 14px; opacity: 0.9; }
 
         /* 미션 섹션 */
-        .missions-section {
-            padding: 20px;
-        }
+        .missions-section { padding: 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .section-title { font-size: 18px; font-weight: 700; color: #2d3436; }
+        .view-all-btn { color: #667eea; text-decoration: none; font-weight: 600; font-size: 14px; }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3436;
-        }
-
-        .view-all-btn {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
+        /* 가로형 미션 카드 - 작고 회색 */
         .mission-card {
-            background: white;
+            background: #f8f9fa;
             border-radius: 12px;
+            padding: 12px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow: hidden;
+            display: flex;
+            gap: 12px;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
-
-        .mission-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .mission-banner {
-            width: 100%;
-            height: 150px;
+        .mission-card:hover { transform: translateX(3px); background: #e9ecef; }
+        .mission-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
             object-fit: cover;
+            flex-shrink: 0;
         }
-
-        .mission-info {
-            padding: 15px;
+        .mission-content {
+            flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
         }
-
         .mission-title {
             font-size: 15px;
             font-weight: 600;
             color: #2d3436;
+            margin-bottom: 4px;
         }
-
-        .mission-reward {
+        .mission-description { font-size: 12px; color: #95a5a6; margin-bottom: 8px; }
+        .mission-footer { display: flex; justify-content: space-between; align-items: center; }
+        .mission-reward-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-weight: 700;
             font-size: 13px;
+        }
+        .completed-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         /* 하단 네비게이션 */
@@ -296,7 +219,6 @@
             padding: 10px 0;
             z-index: 100;
         }
-
         .nav-item {
             flex: 1;
             text-align: center;
@@ -306,93 +228,8 @@
             font-size: 12px;
             transition: all 0.3s;
         }
-
-        .nav-item.active {
-            color: #667eea;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        /* 모달 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .close-btn {
-            background: #f1f2f6;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #f1f2f6;
-            color: #2d3436;
-        }
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
 
         /* 알림 패널 */
         .notification-panel {
@@ -408,11 +245,7 @@
             z-index: 1001;
             overflow-y: auto;
         }
-
-        .notification-panel.active {
-            right: 0;
-        }
-
+        .notification-panel.active { right: 0; }
         .notification-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -421,37 +254,26 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        .notification-header h3 {
+        .notification-header h3 { font-size: 20px; }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
             font-size: 20px;
+            cursor: pointer;
+            color: white;
         }
-
         .notification-item {
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
             transition: background 0.3s;
         }
-
-        .notification-item.unread {
-            background: #f0f4ff;
-        }
-
-        .notification-time {
-            font-size: 12px;
-            color: #95a5a6;
-            margin-top: 5px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #95a5a6;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
+        .notification-item.unread { background: #f0f4ff; }
+        .notification-time { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
+        .empty-icon { font-size: 48px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -484,9 +306,7 @@
                     <div class="attendance-title">🎁 출석 체크</div>
                     <div class="attendance-reward" id="attendanceReward">+10원</div>
                 </div>
-                <button class="attendance-btn" id="attendanceBtn" onclick="checkAttendance()">
-                    출석하기
-                </button>
+                <button class="attendance-btn" id="attendanceBtn" onclick="checkAttendance()">출석하기</button>
                 <div class="attendance-timer" id="attendanceTimer"></div>
             </div>
         </div>
@@ -520,21 +340,6 @@
         </a>
     </div>
 
-    <!-- 미션 모달 -->
-    <div class="modal" id="missionModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">미션 시작</div>
-                <button class="close-btn" onclick="closeModal()">×</button>
-            </div>
-            <p>이 미션을 시작하시겠습니까?</p>
-            <div class="modal-buttons">
-                <button class="modal-btn btn-primary" onclick="startMission()">시작하기</button>
-                <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 알림 패널 -->
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
@@ -549,10 +354,11 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
         let currentUser = null;
-        let currentMission = null;
         let currentBannerIndex = 0;
         let banners = [];
         let bannerInterval = null;
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const userId = localStorage.getItem('userId');
@@ -573,12 +379,8 @@
         async function loadUserData() {
             const userId = localStorage.getItem('userId');
             const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const users = await response.json();
             if (users.length > 0) {
                 currentUser = users[0];
@@ -588,12 +390,8 @@
 
         async function loadHomeBanners() {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/home_banners?is_active=eq.true&order=created_at.desc`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             banners = await response.json();
             
             if (banners.length === 0) {
@@ -602,27 +400,73 @@
             }
 
             const container = document.getElementById('bannerContainer');
-            const dots = document.getElementById('bannerDots');
-            
             container.innerHTML = banners.map(banner => `
                 <div class="banner-slide">
                     <img src="${banner.image_url}" class="banner-image" alt="배너">
                 </div>
             `).join('');
 
+            const dots = document.getElementById('bannerDots');
             dots.innerHTML = banners.map((_, i) => 
                 `<div class="dot ${i === 0 ? 'active' : ''}" onclick="goToBanner(${i})"></div>`
             ).join('');
 
             updateBannerIndicator();
+            setupBannerSwipe();
 
             if (banners.length > 1) {
                 bannerInterval = setInterval(nextBanner, 5000);
             }
         }
 
+        function setupBannerSwipe() {
+            const container = document.getElementById('bannerContainer');
+            
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                clearInterval(bannerInterval);
+            });
+
+            container.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+                if (banners.length > 1) {
+                    bannerInterval = setInterval(nextBanner, 5000);
+                }
+            });
+
+            container.addEventListener('mousedown', (e) => {
+                touchStartX = e.screenX;
+                clearInterval(bannerInterval);
+            });
+
+            container.addEventListener('mouseup', (e) => {
+                touchEndX = e.screenX;
+                handleSwipe();
+                if (banners.length > 1) {
+                    bannerInterval = setInterval(nextBanner, 5000);
+                }
+            });
+        }
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextBanner();
+                } else {
+                    prevBanner();
+                }
+            }
+        }
+
         function nextBanner() {
             currentBannerIndex = (currentBannerIndex + 1) % banners.length;
+            updateBannerSlider();
+        }
+
+        function prevBanner() {
+            currentBannerIndex = (currentBannerIndex - 1 + banners.length) % banners.length;
             updateBannerSlider();
         }
 
@@ -640,37 +484,27 @@
             document.querySelectorAll('.dot').forEach((dot, i) => {
                 dot.classList.toggle('active', i === currentBannerIndex);
             });
-
             updateBannerIndicator();
         }
 
         function updateBannerIndicator() {
-            document.getElementById('bannerIndicator').textContent = 
-                `${currentBannerIndex + 1} / ${banners.length}`;
+            document.getElementById('bannerIndicator').textContent = `${currentBannerIndex + 1} / ${banners.length}`;
         }
 
         async function checkAttendanceStatus() {
             const userId = localStorage.getItem('userId');
             const today = new Date().toISOString().split('T')[0];
             
-            // 출석 보상 금액 가져오기
             const settingsResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const settings = await settingsResponse.json();
             const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
             document.getElementById('attendanceReward').textContent = `+${rewardAmount}원`;
             
             const response = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&date=eq.${today}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const attendance = await response.json();
             const btn = document.getElementById('attendanceBtn');
             
@@ -684,17 +518,12 @@
             const userId = localStorage.getItem('userId');
             const today = new Date().toISOString().split('T')[0];
 
-            // 출석 보상 금액 가져오기
             const settingsResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance_settings?limit=1`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const settings = await settingsResponse.json();
             const rewardAmount = settings.length > 0 ? settings[0].reward_amount : 10;
 
-            // 출석 기록
             await fetch(`${SUPABASE_URL}/rest/v1/attendance`, {
                 method: 'POST',
                 headers: {
@@ -710,7 +539,6 @@
                 })
             });
 
-            // 캐시 업데이트
             const newCash = currentUser.cash + rewardAmount;
             await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
                 method: 'PATCH',
@@ -723,7 +551,6 @@
                 body: JSON.stringify({ cash: newCash })
             });
 
-            // 알림 생성
             await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
                 method: 'POST',
                 headers: {
@@ -765,21 +592,13 @@
             const userId = localStorage.getItem('userId');
             
             const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc&limit=5`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const missions = await missionsResponse.json();
 
             const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-
             const completed = await completedResponse.json();
             const completedIds = completed.map(c => c.mission_id);
 
@@ -790,18 +609,24 @@
                 return;
             }
 
-            missionsList.innerHTML = missions.map(mission => `
-                <div class="mission-card" onclick="openMission('${mission.id}', ${completedIds.includes(mission.id)})">
-                    <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
-                    <div class="mission-info">
-                        <div>
-                            <div class="mission-title">${mission.title}</div>
-                            ${completedIds.includes(mission.id) ? '<div style="color: #95a5a6; font-size: 12px;">✓ 완료</div>' : ''}
+            missionsList.innerHTML = missions.map(mission => {
+                const isCompleted = completedIds.includes(mission.id);
+                return `
+                    <div class="mission-card" onclick="openMission('${mission.id}', ${isCompleted})">
+                        <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
+                        <div class="mission-content">
+                            <div>
+                                <div class="mission-title">${mission.title}</div>
+                                <div class="mission-description">미션을 완료하고 캐시를 받으세요</div>
+                            </div>
+                            <div class="mission-footer">
+                                <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
+                            </div>
                         </div>
-                        <div class="mission-reward">+${mission.cash_reward.toLocaleString()}원</div>
+                        ${isCompleted ? '<div class="completed-badge">완료</div>' : ''}
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function openMission(missionId, isCompleted) {
@@ -810,89 +635,113 @@
                 return;
             }
 
+            // 바로 미션 시작
             fetch(`${SUPABASE_URL}/rest/v1/missions?id=eq.${missionId}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             })
             .then(res => res.json())
             .then(missions => {
                 if (missions.length > 0) {
-                    currentMission = missions[0];
-                    document.getElementById('missionModal').classList.add('active');
+                    const mission = missions[0];
+                    
+                    // 미션 ID를 세션에 저장
+                    sessionStorage.setItem('currentMissionId', mission.id);
+                    sessionStorage.setItem('currentMissionReward', mission.cash_reward);
+                    sessionStorage.setItem('currentMissionTitle', mission.title);
+                    sessionStorage.setItem('missionStartTime', Date.now());
+                    
+                    // 바로 링크로 이동
+                    window.open(mission.link, '_blank');
                 }
             });
         }
 
-        function closeModal() {
-            document.getElementById('missionModal').classList.remove('active');
-            currentMission = null;
-        }
-
-        async function startMission() {
-            if (!currentMission) return;
-
-            window.open(currentMission.link, '_blank');
-            closeModal();
-
-            setTimeout(async () => {
-                const userId = localStorage.getItem('userId');
+        // 페이지 돌아왔을 때 미션 완료 체크
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden) {
+                const missionId = sessionStorage.getItem('currentMissionId');
+                const startTime = sessionStorage.getItem('missionStartTime');
                 
-                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        mission_id: currentMission.id,
-                        cash_earned: currentMission.cash_reward
-                    })
-                });
+                if (missionId && startTime) {
+                    const elapsed = Date.now() - parseInt(startTime);
+                    
+                    // 10초 이상 지났으면 미션 완료
+                    if (elapsed >= 10000) {
+                        const userId = localStorage.getItem('userId');
+                        const reward = parseInt(sessionStorage.getItem('currentMissionReward'));
+                        const title = sessionStorage.getItem('currentMissionTitle');
+                        
+                        // 이미 완료했는지 체크
+                        const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${missionId}`, {
+                            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                        });
+                        const existing = await checkResponse.json();
+                        
+                        if (existing.length === 0) {
+                            // 미션 완료 처리
+                            await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': SUPABASE_KEY,
+                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify({
+                                    user_id: userId,
+                                    mission_id: missionId,
+                                    cash_earned: reward
+                                })
+                            });
 
-                const newCash = currentUser.cash + currentMission.cash_reward;
-                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ cash: newCash })
-                });
+                            // 캐시 업데이트
+                            const newCash = currentUser.cash + reward;
+                            await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'apikey': SUPABASE_KEY,
+                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify({ cash: newCash })
+                            });
 
-                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        type: 'mission',
-                        message: `미션 성공! "${currentMission.title}" 완료로 +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
-                    })
-                });
+                            // 알림 생성
+                            await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': SUPABASE_KEY,
+                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify({
+                                    user_id: userId,
+                                    type: 'mission',
+                                    message: `미션 성공! "${title}" 완료로 +${reward.toLocaleString()}원이 적립되었습니다.`
+                                })
+                            });
 
-                alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
-                location.reload();
-            }, 10000);
-        }
+                            alert(`미션 완료! +${reward.toLocaleString()}원이 적립되었습니다.`);
+                            
+                            // 세션 정리
+                            sessionStorage.removeItem('currentMissionId');
+                            sessionStorage.removeItem('currentMissionReward');
+                            sessionStorage.removeItem('currentMissionTitle');
+                            sessionStorage.removeItem('missionStartTime');
+                            
+                            location.reload();
+                        }
+                    }
+                }
+            }
+        });
 
         async function loadNotifications() {
             const userId = localStorage.getItem('userId');
             const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${userId}&order=created_at.desc&limit=50`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
 
             const notifications = await response.json();
