@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이페이지 - 캐시뎃</title>
+    <title>마이페이지 - 캐시봇</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -178,7 +178,7 @@
         <div class="header">
             <div class="profile-icon">👤</div>
             <div class="nickname" id="userNickname">사용자</div>
-            <div class="email" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3d58505c54517d58455c504d5158135e5250">[email&#160;protected]</a></div>
+            <div class="email" id="userEmail">user@example.com</div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
                 <div class="cash-amount"><span id="userCash">0</span> 원</div>
@@ -197,7 +197,7 @@
             <div class="menu-item" onclick="location.href='chat.html'">
                 <div class="menu-left">
                     <div class="menu-icon">💬</div>
-                    <div class="menu-text">고객센터</div>
+                    <div class="menu-text">문의하기</div>
                 </div>
                 <div class="menu-arrow">›</div>
             </div>
@@ -238,6 +238,10 @@
         <a href="missions.html" class="nav-item">
             <span class="nav-icon">🎯</span>
             미션
+        </a>
+        <a href="shop.html" class="nav-item">
+            <span class="nav-icon">🛍️</span>
+            상점
         </a>
         <a href="attendance.html" class="nav-item">
             <span class="nav-icon">📅</span>
@@ -296,7 +300,7 @@
         </div>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
         const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
@@ -340,7 +344,14 @@
 
             const allHistory = [
                 ...missionHistory.map(m => ({ ...m, type: 'mission', date: m.completed_at, title: '미션 완료', amount: m.cash_earned })),
-                ...attendanceHistory.map(a => ({ ...a, type: 'attendance', date: a.created_at, title: '출석 체크', amount: a.reward_amount }))
+                ...attendanceHistory.map(a => {
+                    // 상품 구매인 경우
+                    if (a.purchase_type === '상품 구매') {
+                        return { ...a, type: 'purchase', date: a.created_at, title: '상품 구매', productName: a.purchase_name, amount: a.reward_amount };
+                    }
+                    // 일반 출석 체크
+                    return { ...a, type: 'attendance', date: a.created_at, title: '출석 체크', amount: a.reward_amount };
+                })
             ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
             const historyList = document.getElementById('historyList');
@@ -348,13 +359,28 @@
             if (allHistory.length === 0) {
                 historyList.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
             } else {
-                historyList.innerHTML = allHistory.map(item => `
+                historyList.innerHTML = allHistory.map(item => {
+                    let icon = '📅';
+                    let title = item.title;
+                    let amountClass = 'history-amount';
+                    let amountPrefix = '+';
+                    
+                    if (item.type === 'mission') {
+                        icon = '🎯';
+                    } else if (item.type === 'purchase') {
+                        icon = '🛍️';
+                        title = `상품 구매 (${item.productName})`;
+                        amountClass = 'history-amount-negative';
+                        amountPrefix = '';
+                    }
+                    
+                    return `
                     <div class="history-item">
-                        <div class="history-title">${item.type === 'attendance' ? '📅 출석 체크' : '🎯 미션 완료'}</div>
-                        <div class="history-amount">+${item.amount.toLocaleString()}원</div>
+                        <div class="history-title">${icon} ${title}</div>
+                        <div class="${amountClass}" style="${item.type === 'purchase' ? 'color: #e74c3c;' : ''}">${amountPrefix}${item.amount.toLocaleString()}원</div>
                         <div class="history-date">${new Date(item.date).toLocaleString('ko-KR')}</div>
                     </div>
-                `).join('');
+                `}).join('');
             }
 
             document.getElementById('historyModal').classList.add('active');
@@ -436,4 +462,12 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        functi
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('userId');
+                location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
