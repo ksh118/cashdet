@@ -24,28 +24,6 @@
         }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         .user-greeting { font-size: 16px; font-weight: 600; }
-        .notification-btn {
-            position: relative;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            color: white;
-        }
-        .notification-badge {
-            display: none;
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: #ff4757;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-        .notification-badge.active { display: block; }
         .cash-info { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
         .cash-amount { font-size: 20px; font-weight: 700; }
 
@@ -294,47 +272,6 @@
         }
         .btn-secondary:hover { background: #dfe6e9; }
 
-        /* 알림 패널 */
-        .notification-panel {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 400px;
-            height: 100%;
-            background: white;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.2);
-            transition: right 0.3s;
-            z-index: 1001;
-            overflow-y: auto;
-        }
-        .notification-panel.active { right: 0; }
-        .notification-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .notification-header h3 { font-size: 20px; }
-        .close-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            color: white;
-        }
-        .notification-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s;
-        }
-        .notification-item.unread { background: #f0f4ff; }
-        .notification-time { font-size: 12px; color: #95a5a6; margin-top: 5px; }
         .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
         .empty-icon { font-size: 48px; margin-bottom: 10px; }
     </style>
@@ -344,10 +281,6 @@
         <div class="header">
             <div class="header-top">
                 <div class="user-greeting">안녕하세요! 👋</div>
-                <button class="notification-btn" onclick="location.href='notifications.html'">
-                    🔔
-                    <div class="notification-badge" id="notificationBadge"></div>
-                </button>
             </div>
             <div class="cash-info">
                 <div class="cash-amount"><span id="userCash">0</span>원</div>
@@ -390,6 +323,10 @@
             <span class="nav-icon">🎯</span>
             미션
         </a>
+        <a href="shop.html" class="nav-item">
+            <span class="nav-icon">🛍️</span>
+            상점
+        </a>
         <a href="attendance.html" class="nav-item">
             <span class="nav-icon">📅</span>
             출석
@@ -418,15 +355,6 @@
         </div>
     </div>
 
-    <!-- 알림 패널 -->
-    <div class="notification-panel" id="notificationPanel">
-        <div class="notification-header">
-            <h3>알림</h3>
-            <button class="close-btn" onclick="toggleNotifications()">×</button>
-        </div>
-        <div id="notificationsList"></div>
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
@@ -449,13 +377,9 @@
             await loadUserData();
             await loadHomeBanners();
             await loadMissions();
-            await loadNotifications();
             await checkAttendanceStatus();
             updateAttendanceTimer();
             setInterval(updateAttendanceTimer, 1000);
-            
-            // 3초마다 알림 새로고침
-            setInterval(loadNotifications, 3000);
         });
 
         async function loadUserData() {
@@ -817,64 +741,6 @@
                     alert('미션 완료 처리 중 오류가 발생했습니다.');
                 }
             }, 10000);
-        }
-
-        async function loadNotifications() {
-            const userId = localStorage.getItem('userId');
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${userId}&order=created_at.desc&limit=50`, {
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-                });
-
-                const notifications = await response.json();
-                const unreadCount = notifications.filter(n => !n.is_read).length;
-
-                const badge = document.getElementById('notificationBadge');
-                if (unreadCount > 0) {
-                    badge.classList.add('active');
-                } else {
-                    badge.classList.remove('active');
-                }
-
-                const notificationsList = document.getElementById('notificationsList');
-                
-                if (notifications.length === 0) {
-                    notificationsList.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><div>알림이 없습니다</div></div>';
-                    return;
-                }
-
-                notificationsList.innerHTML = notifications.map(notif => `
-                    <div class="notification-item ${!notif.is_read ? 'unread' : ''}">
-                        <div style="font-weight: ${!notif.is_read ? '700' : '400'};">${notif.message}</div>
-                        <div class="notification-time">${new Date(notif.created_at).toLocaleString('ko-KR')}</div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('알림 로드 오류:', error);
-            }
-        }
-
-        function toggleNotifications() {
-            const panel = document.getElementById('notificationPanel');
-            panel.classList.toggle('active');
-
-            if (panel.classList.contains('active')) {
-                const userId = localStorage.getItem('userId');
-                fetch(`${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${userId}&is_read=eq.false`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ is_read: true })
-                }).then(() => {
-                    setTimeout(() => {
-                        loadNotifications();
-                    }, 500);
-                });
-            }
         }
     </script>
 </body>
