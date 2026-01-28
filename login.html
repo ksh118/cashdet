@@ -298,18 +298,21 @@
             const password = document.getElementById('loginPassword').value;
 
             try {
-                // Supabase Auth로 로그인
-                const { data, error } = await client.auth.signInWithPassword({ 
-                    email, 
-                    password 
+                // 기존 방식: users 테이블에서 직접 확인
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(password)}`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
                 });
 
-                if (error) {
-                    showError('이메일 또는 비밀번호가 올바르지 않습니다.');
-                } else {
-                    // 로그인 성공
-                    localStorage.setItem('userId', data.user.id);
+                const users = await response.json();
+
+                if (users.length > 0) {
+                    localStorage.setItem('userId', users[0].id);
                     window.location.href = 'index.html';
+                } else {
+                    showError('이메일 또는 비밀번호가 올바르지 않습니다.');
                 }
             } catch (error) {
                 showError('로그인 중 오류가 발생했습니다.');
@@ -346,23 +349,47 @@
             }
 
             try {
-                // Supabase Auth로 회원가입
-                const { data, error } = await client.auth.signUp({
-                    email, 
-                    password, 
-                    options: { 
-                        data: { 
-                            display_name: nickname 
-                        } 
+                // 이메일 중복 체크
+                const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
 
-                if (error) {
-                    showError(error.message);
-                } else {
-                    alert("인증 메일을 보냈습니다. 메일 확인 후 로그인해 주세요!");
+                const existingUsers = await checkResponse.json();
+
+                if (existingUsers.length > 0) {
+                    showError('이미 사용 중인 이메일입니다.');
+                    return;
+                }
+
+                // 회원가입 - users 테이블에 직접 추가
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        nickname: nickname,
+                        password: password,
+                        cash: 0
+                    })
+                });
+
+                if (response.ok) {
+                    const newUsers = await response.json();
+                    alert('회원가입이 완료되었습니다!');
                     // 회원가입 후 로그인 탭으로 전환
                     document.querySelector('.tab:first-child').click();
+                    // 이메일 자동 입력
+                    document.getElementById('loginEmail').value = email;
+                } else {
+                    showError('회원가입 중 오류가 발생했습니다.');
                 }
             } catch (error) {
                 showError('회원가입 중 오류가 발생했습니다.');
@@ -381,20 +408,70 @@
                 });
                 
                 if (error) {
-                    showError('구글 로그인에 실패했습니다.');
+                    console.error('Google OAuth error:', error);
+                    showError('구글 로그인에 실패했습니다. Supabase에서 Google Provider를 활성화해주세요.');
                 }
             } catch (error) {
+                console.error('Google login error:', error);
                 showError('구글 로그인 중 오류가 발생했습니다.');
-                console.error(error);
             }
         });
 
         // 접속 시 로그인 세션 체크
         async function checkUser() {
-            const { data: { session } } = await client.auth.getSession();
-            if (session) {
-                localStorage.setItem('userId', session.user.id);
+            // 먼저 localStorage 확인
+            if (localStorage.getItem('userId')) {
                 window.location.href = 'index.html';
+                return;
+            }
+
+            // Supabase Auth 세션 확인 (구글 로그인용)
+            try {
+                const { data: { session } } = await client.auth.getSession();
+                if (session) {
+                    // 구글 로그인으로 들어온 경우 users 테이블에 추가
+                    const email = session.user.email;
+                    const nickname = session.user.user_metadata?.display_name || session.user.email.split('@')[0];
+                    
+                    // users 테이블에 해당 이메일이 있는지 확인
+                    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}`, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+                    
+                    const existingUsers = await checkResponse.json();
+                    
+                    if (existingUsers.length > 0) {
+                        // 이미 있으면 해당 ID 사용
+                        localStorage.setItem('userId', existingUsers[0].id);
+                    } else {
+                        // 없으면 새로 생성
+                        const createResponse = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                nickname: nickname,
+                                password: 'google_oauth_' + session.user.id, // 구글 로그인용 더미 비밀번호
+                                cash: 0
+                            })
+                        });
+                        
+                        const newUsers = await createResponse.json();
+                        localStorage.setItem('userId', newUsers[0].id);
+                    }
+                    
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
             }
         }
         checkUser();
