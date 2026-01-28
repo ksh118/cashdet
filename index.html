@@ -680,67 +680,9 @@
                 return;
             }
 
-            closeModal();
-            
-            // 새 탭으로 링크 열기
-            window.open(currentMission.link, '_blank');
-
-            // 10초 후 미션 완료 처리
-            setTimeout(async () => {
-                try {
-                    // 미션 완료 처리
-                    await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'return=minimal'
-                        },
-                        body: JSON.stringify({
-                            user_id: userId,
-                            mission_id: currentMission.id,
-                            cash_earned: currentMission.cash_reward
-                        })
-                    });
-
-                    // 캐시 업데이트
-                    const newCash = currentUser.cash + currentMission.cash_reward;
-                    await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'return=minimal'
-                        },
-                        body: JSON.stringify({ cash: newCash })
-                    });
-
-                    // 알림 생성
-                    await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'return=representation'
-                        },
-                        body: JSON.stringify({
-                            user_id: userId,
-                            type: 'mission',
-                            message: `🎯 미션 성공! "${currentMission.title}" 완료로 +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`,
-                            is_read: false
-                        })
-                    });
-
-                    alert(`🎉 미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
-                    location.reload();
-                } catch (error) {
-                    console.error('미션 완료 처리 오류:', error);
-                    alert('미션 완료 처리 중 오류가 발생했습니다.');
-                }
-            }, 10000);
+            // 미션 ID를 로컬스토리지에 저장하고 missions.html로 이동
+            localStorage.setItem('selectedMissionId', currentMission.id);
+            location.href = 'missions.html';
         }
     </script>
 </body>
