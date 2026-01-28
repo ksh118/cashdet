@@ -5,36 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 - 캐시뎃</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8f9fa;
             padding-bottom: 80px;
         }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
-
+        .container { max-width: 600px; margin: 0 auto; background: white; min-height: 100vh; }
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 40px 20px;
             text-align: center;
         }
-
-        .profile-section {
-            margin-bottom: 20px;
-        }
-
         .profile-icon {
             width: 80px;
             height: 80px;
@@ -46,18 +29,8 @@
             font-size: 40px;
             margin: 0 auto 15px;
         }
-
-        .nickname {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .email {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
+        .nickname { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+        .email { font-size: 14px; opacity: 0.8; }
         .cash-card {
             background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
@@ -65,22 +38,9 @@
             padding: 25px;
             margin-top: 20px;
         }
-
-        .cash-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .cash-amount {
-            font-size: 36px;
-            font-weight: 800;
-        }
-
-        .menu-section {
-            padding: 20px;
-        }
-
+        .cash-label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+        .cash-amount { font-size: 36px; font-weight: 800; }
+        .menu-section { padding: 20px; }
         .menu-item {
             background: white;
             padding: 18px 20px;
@@ -93,33 +53,14 @@
             transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
         .menu-item:hover {
             transform: translateX(5px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        .menu-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .menu-icon {
-            font-size: 24px;
-        }
-
-        .menu-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2d3436;
-        }
-
-        .menu-arrow {
-            color: #95a5a6;
-            font-size: 20px;
-        }
-
+        .menu-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; }
+        .menu-text { font-size: 16px; font-weight: 600; color: #2d3436; }
+        .menu-arrow { color: #95a5a6; font-size: 20px; }
         .logout-btn {
             background: #ff4757;
             color: white;
@@ -133,12 +74,7 @@
             margin-top: 20px;
             transition: all 0.3s;
         }
-
-        .logout-btn:hover {
-            background: #ff3838;
-            transform: translateY(-2px);
-        }
-
+        .logout-btn:hover { background: #ff3838; transform: translateY(-2px); }
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -153,7 +89,6 @@
             padding: 10px 0;
             z-index: 100;
         }
-
         .nav-item {
             flex: 1;
             text-align: center;
@@ -163,17 +98,8 @@
             font-size: 12px;
             transition: all 0.3s;
         }
-
-        .nav-item.active {
-            color: #667eea;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
         .modal {
             display: none;
             position: fixed;
@@ -186,11 +112,7 @@
             align-items: center;
             justify-content: center;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
             background: white;
             border-radius: 20px;
@@ -200,20 +122,13 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2d3436;
-        }
-
+        .modal-title { font-size: 20px; font-weight: 700; color: #2d3436; }
         .close-btn {
             background: #f1f2f6;
             border: none;
@@ -223,41 +138,12 @@
             font-size: 20px;
             cursor: pointer;
         }
-
-        .history-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .history-title {
-            font-weight: 600;
-            color: #2d3436;
-            margin-bottom: 5px;
-        }
-
-        .history-amount {
-            color: #27ae60;
-            font-weight: 700;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .history-date {
-            font-size: 12px;
-            color: #95a5a6;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2d3436;
-        }
-
+        .history-item { padding: 15px; border-bottom: 1px solid #eee; }
+        .history-title { font-weight: 600; color: #2d3436; margin-bottom: 5px; }
+        .history-amount { color: #27ae60; font-weight: 700; font-size: 18px; margin-bottom: 5px; }
+        .history-date { font-size: 12px; color: #95a5a6; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d3436; }
         .form-input {
             width: 100%;
             padding: 12px 15px;
@@ -266,12 +152,7 @@
             font-size: 16px;
             transition: all 0.3s;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
+        .form-input:focus { outline: none; border-color: #667eea; }
         .save-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -284,21 +165,35 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
         .save-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
+        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
+        .empty-icon { font-size: 48px; margin-bottom: 10px; }
+        .reply-item {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .reply-subject {
+            font-weight: 600;
+            color: #2d3436;
+        }
+        .reply-date {
+            font-size: 12px;
             color: #95a5a6;
         }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
+        .reply-content {
+            color: #2d3436;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -308,11 +203,11 @@
             <div class="profile-section">
                 <div class="profile-icon">👤</div>
                 <div class="nickname" id="userNickname">사용자</div>
-                <div class="email" id="userEmail">user@example.com</div>
+                <div class="email" id="userEmail">email@example.com</div>
             </div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
-                <div class="cash-amount"><span id="userCash">0</span> 캐시</div>
+                <div class="cash-amount"><span id="userCash">0</span> 원</div>
             </div>
         </div>
 
@@ -321,6 +216,22 @@
                 <div class="menu-left">
                     <div class="menu-icon">📊</div>
                     <div class="menu-text">적립 내역</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="location.href='chat.html'">
+                <div class="menu-left">
+                    <div class="menu-icon">💬</div>
+                    <div class="menu-text">고객센터</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="showReplies()">
+                <div class="menu-left">
+                    <div class="menu-icon">💌</div>
+                    <div class="menu-text">답변 확인</div>
                 </div>
                 <div class="menu-arrow">›</div>
             </div>
@@ -346,6 +257,10 @@
             <span class="nav-icon">🎯</span>
             미션
         </a>
+        <a href="attendance.html" class="nav-item">
+            <span class="nav-icon">📅</span>
+            출석
+        </a>
         <a href="me.html" class="nav-item active">
             <span class="nav-icon">👤</span>
             마이
@@ -360,6 +275,17 @@
                 <button class="close-btn" onclick="closeModal('historyModal')">×</button>
             </div>
             <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- 답변 확인 모달 -->
+    <div class="modal" id="repliesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">💌 받은 답변</div>
+                <button class="close-btn" onclick="closeModal('repliesModal')">×</button>
+            </div>
+            <div id="repliesList"></div>
         </div>
     </div>
 
@@ -400,7 +326,6 @@
                 location.href = 'login.html';
                 return;
             }
-
             await loadUserData();
         });
 
@@ -425,50 +350,75 @@
         async function showHistory() {
             const userId = localStorage.getItem('userId');
             
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&order=completed_at.desc`, {
+            // 미션 적립 내역
+            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&order=completed_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            const missionHistory = await response.json();
+
+            // 출석 적립 내역
+            const attendanceResponse = await fetch(`${SUPABASE_URL}/rest/v1/attendance?user_id=eq.${userId}&order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            const attendanceHistory = await attendanceResponse.json();
+
+            // 통합 정렬
+            const allHistory = [
+                ...missionHistory.map(m => ({ ...m, type: 'mission', date: m.completed_at })),
+                ...attendanceHistory.map(a => ({ ...a, type: 'attendance', date: a.created_at }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const historyList = document.getElementById('historyList');
+            
+            if (allHistory.length === 0) {
+                historyList.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
+            } else {
+                historyList.innerHTML = allHistory.map(item => `
+                    <div class="history-item">
+                        <div class="history-title">${item.type === 'attendance' ? '출석 체크' : '미션 완료'}</div>
+                        <div class="history-amount">+${(item.cash_earned || item.reward_amount).toLocaleString()}원</div>
+                        <div class="history-date">${new Date(item.date).toLocaleString('ko-KR')}</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('historyModal').classList.add('active');
+        }
+
+        async function showReplies() {
+            const userId = localStorage.getItem('userId');
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/inquiries?user_id=eq.${userId}&status=eq.answered&order=created_at.desc`, {
                 headers: {
                     'apikey': SUPABASE_KEY,
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
 
-            const history = await response.json();
-
-            // 미션 정보도 가져오기
-            const missionIds = history.map(h => h.mission_id).join(',');
-            if (missionIds) {
-                const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?id=in.(${missionIds})`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-
-                const missions = await missionsResponse.json();
-                const missionMap = {};
-                missions.forEach(m => missionMap[m.id] = m);
-
-                const historyList = document.getElementById('historyList');
-                
-                if (history.length === 0) {
-                    historyList.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
-                } else {
-                    historyList.innerHTML = history.map(item => {
-                        const mission = missionMap[item.mission_id];
-                        return `
-                            <div class="history-item">
-                                <div class="history-title">${mission ? mission.title : '미션'}</div>
-                                <div class="history-amount">+${item.cash_earned.toLocaleString()}캐시</div>
-                                <div class="history-date">${new Date(item.completed_at).toLocaleString('ko-KR')}</div>
-                            </div>
-                        `;
-                    }).join('');
-                }
+            const inquiries = await response.json();
+            const repliesList = document.getElementById('repliesList');
+            
+            if (inquiries.length === 0) {
+                repliesList.innerHTML = '<div class="empty-state"><div class="empty-icon">💌</div><div>받은 답변이 없습니다</div></div>';
             } else {
-                document.getElementById('historyList').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
+                repliesList.innerHTML = inquiries.map(inquiry => `
+                    <div class="reply-item">
+                        <div class="reply-header">
+                            <div class="reply-subject">Re: ${inquiry.subject}</div>
+                            <div class="reply-date">${new Date(inquiry.replied_at).toLocaleString('ko-KR')}</div>
+                        </div>
+                        <div class="reply-content">${inquiry.reply_message}</div>
+                    </div>
+                `).join('');
             }
 
-            document.getElementById('historyModal').classList.add('active');
+            document.getElementById('repliesModal').classList.add('active');
         }
 
         function showSettings() {
