@@ -333,12 +333,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">배너 이미지</label>
-                        <div class="url-input-wrapper">
-                            <input type="text" class="form-input" id="bannerUrl" placeholder="이미지 URL을 입력하세요" required>
-                            <div class="current-url" id="currentBannerUrl" style="display: none;"></div>
+                        <label class="form-label">배너 이미지 (여러 개 선택 가능)</label>
+                        <div class="file-input-wrapper">
+                            <label for="bannerFiles" class="file-input-label">
+                                📁 이미지 파일 선택 (클릭)
+                            </label>
+                            <input type="file" id="bannerFiles" class="file-input" accept="image/*" multiple onchange="previewBanners(event)">
                         </div>
-                        <img id="bannerPreview" class="preview-image" alt="배너 미리보기">
+                        <div id="bannerPreviews" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;"></div>
+                        <div style="font-size: 12px; color: #95a5a6; margin-top: 8px;">
+                            💡 여러 이미지를 선택하면 자동으로 슬라이더 배너가 됩니다
+                        </div>
                     </div>
 
                     <button type="submit" class="submit-btn">미션 등록하기</button>
@@ -356,21 +361,39 @@
         const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
-        // 배너 URL 미리보기
-        document.getElementById('bannerUrl').addEventListener('input', function() {
-            const url = this.value;
-            const preview = document.getElementById('bannerPreview');
+        let selectedFiles = [];
+
+        // 배너 파일 미리보기
+        function previewBanners(event) {
+            selectedFiles = Array.from(event.target.files);
+            const previewContainer = document.getElementById('bannerPreviews');
             
-            if (url) {
-                preview.src = url;
-                preview.style.display = 'block';
-                preview.onerror = function() {
-                    this.style.display = 'none';
+            previewContainer.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.style.position = 'relative';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px;">
+                        <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${index + 1}</div>
+                    `;
+                    previewContainer.appendChild(div);
                 };
-            } else {
-                preview.style.display = 'none';
-            }
-        });
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 이미지를 Base64로 변환
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadStats();
@@ -433,10 +456,10 @@
 
             missionsList.innerHTML = missions.map(mission => `
                 <div class="mission-item">
-                    <img src="${mission.banner_url}" class="mission-banner-small" alt="${mission.title}">
+                    <img src="${mission.banner_url}" class="mission-banner-small" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/100x80?text=No+Image'">
                     <div class="mission-details">
                         <div class="mission-name">${mission.title}</div>
-                        <div class="mission-reward">💰 ${mission.cash_reward.toLocaleString()}원</div>
+                        <div class="mission-reward">💰 ${mission.cash_reward.toLocaleString()} 캐시</div>
                         <div class="mission-link">${mission.link}</div>
                     </div>
                     <div class="mission-actions">
@@ -458,33 +481,53 @@
             const title = document.getElementById('missionTitle').value;
             const cash = parseInt(document.getElementById('missionCash').value);
             const link = document.getElementById('missionLink').value;
-            const bannerUrl = document.getElementById('bannerUrl').value;
 
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/missions`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    title: title,
-                    cash_reward: cash,
-                    link: link,
-                    banner_url: bannerUrl,
-                    is_active: true
-                })
-            });
+            if (selectedFiles.length === 0) {
+                alert('배너 이미지를 선택해주세요.');
+                return;
+            }
 
-            if (response.ok) {
-                alert('미션이 등록되었습니다!');
+            try {
+                // 여러 배너가 있을 경우 각각 미션으로 등록
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const base64Image = await fileToBase64(file);
+                    
+                    const missionTitle = selectedFiles.length > 1 
+                        ? `${title} (${i + 1}/${selectedFiles.length})`
+                        : title;
+
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/missions`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            title: missionTitle,
+                            cash_reward: cash,
+                            link: link,
+                            banner_url: base64Image,
+                            is_active: true
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('미션 등록 실패');
+                    }
+                }
+
+                alert(`${selectedFiles.length}개의 미션이 등록되었습니다!`);
                 document.getElementById('missionForm').reset();
-                document.getElementById('bannerPreview').style.display = 'none';
+                document.getElementById('bannerPreviews').innerHTML = '';
+                selectedFiles = [];
                 await loadStats();
                 await loadMissions();
-            } else {
-                alert('미션 등록에 실패했습니다.');
+            } catch (error) {
+                alert('미션 등록에 실패했습니다: ' + error.message);
+                console.error(error);
             }
         }
 
