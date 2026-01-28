@@ -70,6 +70,8 @@
         }
         .mission-card:hover { transform: translateX(3px); background: #e9ecef; }
         .mission-card.completed { opacity: 0.7; }
+        .mission-card.pending { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .mission-card.rejected { background: #f8d7da; border-left: 4px solid #dc3545; }
         .mission-thumbnail {
             width: 80px;
             height: 80px;
@@ -94,17 +96,28 @@
             font-weight: 700;
             font-size: 13px;
         }
-        .completed-badge {
+        .category-badge {
+            background: #e17055;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        .completed-badge, .pending-badge, .rejected-badge {
             position: absolute;
             top: 12px;
             right: 12px;
-            background: #27ae60;
             color: white;
             padding: 4px 8px;
             border-radius: 8px;
             font-size: 11px;
             font-weight: 600;
         }
+        .completed-badge { background: #27ae60; }
+        .pending-badge { background: #f39c12; }
+        .rejected-badge { background: #e74c3c; }
         
         .empty-state { text-align: center; padding: 60px 20px; color: #95a5a6; }
         .empty-icon { font-size: 64px; margin-bottom: 15px; }
@@ -212,11 +225,15 @@
 
         <div class="tabs">
             <div class="tab active" onclick="switchTab('ongoing')">진행 중</div>
+            <div class="tab" onclick="switchTab('pending')">대기중</div>
             <div class="tab" onclick="switchTab('completed')">완료</div>
+            <div class="tab" onclick="switchTab('rejected')">거절됨</div>
         </div>
 
         <div class="missions-container" id="ongoingMissions"></div>
-        <div class="missions-container" id="completedMissions" style="display: none;"></div>
+        <div class="missions-container" id="pendingMissions" style="display:none;"></div>
+        <div class="missions-container" id="completedMissions" style="display:none;"></div>
+        <div class="missions-container" id="rejectedMissions" style="display:none;"></div>
     </div>
 
     <div class="bottom-nav">
@@ -228,25 +245,22 @@
             <span class="nav-icon">🎯</span>
             미션
         </a>
-        <a href="attendance.html" class="nav-item">
-            <span class="nav-icon">📅</span>
-            출석
+        <a href="shop.html" class="nav-item">
+            <span class="nav-icon">🛍️</span>
+            상점
         </a>
         <a href="me.html" class="nav-item">
             <span class="nav-icon">👤</span>
-            마이
+            MY
         </a>
     </div>
 
     <!-- 미션 안내 모달 -->
     <div class="modal" id="missionModal">
         <div class="modal-content">
-            <div class="modal-icon">🎯</div>
+            <div class="modal-icon" id="modalIcon">🎯</div>
             <div class="modal-title" id="modalMissionTitle">미션을 시작하시겠습니까?</div>
-            <div class="modal-description" id="modalMissionDescription">
-                광고 페이지가 새 탭으로 열립니다.<br>
-                시작 버튼을 누르면 즉시 보상이 지급됩니다!
-            </div>
+            <div class="modal-description" id="modalMissionDescription"></div>
             <div class="modal-buttons">
                 <button class="modal-btn btn-primary" onclick="startMission()">시작하기</button>
                 <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
@@ -261,7 +275,7 @@
         let currentUser = null;
         let currentMission = null;
         let allMissions = [];
-        let completedMissionIds = [];
+        let userMissions = [];
         let currentTab = 'ongoing';
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -294,59 +308,142 @@
             });
             allMissions = await missionsResponse.json();
 
-            const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
+            const userMissionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-            const completed = await completedResponse.json();
-            completedMissionIds = completed.map(c => c.mission_id);
+            userMissions = await userMissionsResponse.json();
 
             displayMissions();
         }
 
         function displayMissions() {
-            const ongoing = allMissions.filter(m => !completedMissionIds.includes(m.id));
-            const completed = allMissions.filter(m => completedMissionIds.includes(m.id));
+            const ongoing = [];
+            const pending = [];
+            const completed = [];
+            const rejected = [];
+
+            allMissions.forEach(mission => {
+                const userMission = userMissions.find(um => um.mission_id === mission.id);
+                
+                if (!userMission) {
+                    ongoing.push({ ...mission, userMission: null });
+                } else if (userMission.status === 'pending') {
+                    pending.push({ ...mission, userMission });
+                } else if (userMission.status === 'completed') {
+                    completed.push({ ...mission, userMission });
+                } else if (userMission.status === 'rejected') {
+                    rejected.push({ ...mission, userMission });
+                }
+            });
 
             const ongoingDiv = document.getElementById('ongoingMissions');
+            const pendingDiv = document.getElementById('pendingMissions');
             const completedDiv = document.getElementById('completedMissions');
+            const rejectedDiv = document.getElementById('rejectedMissions');
 
+            // 진행 중
             if (ongoing.length === 0) {
-                ongoingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>모든 미션을 완료했습니다!</div></div>';
+                ongoingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>진행 가능한 미션이 없습니다!</div></div>';
             } else {
-                ongoingDiv.innerHTML = ongoing.map(mission => `
-                    <div class="mission-card" onclick="openMission('${mission.id}')">
-                        <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
-                        <div class="mission-content">
-                            <div>
-                                <div class="mission-title">${mission.title}</div>
-                                <div class="mission-description">10초 시청 후 보상 지급</div>
-                            </div>
-                            <div class="mission-footer">
-                                <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
+                ongoingDiv.innerHTML = ongoing.map(item => {
+                    const categoryText = item.category === '10sec' ? '10초' : 
+                                       item.category === 'quiz' ? '퀴즈' : '설치';
+                    return `
+                        <div class="mission-card" onclick="openMission('${item.id}')">
+                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
+                            <div class="mission-content">
+                                <div>
+                                    <div class="mission-title">
+                                        ${item.title}
+                                        <span class="category-badge">${categoryText}</span>
+                                    </div>
+                                    <div class="mission-description">${item.description}</div>
+                                </div>
+                                <div class="mission-footer">
+                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `}).join('');
             }
 
+            // 대기중
+            if (pending.length === 0) {
+                pendingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div>대기중인 미션이 없습니다</div></div>';
+            } else {
+                pendingDiv.innerHTML = pending.map(item => {
+                    const categoryText = item.category === 'quiz' ? '퀴즈' : '설치';
+                    return `
+                        <div class="mission-card pending">
+                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
+                            <div class="mission-content">
+                                <div>
+                                    <div class="mission-title">
+                                        ${item.title}
+                                        <span class="category-badge">${categoryText}</span>
+                                    </div>
+                                    <div class="mission-description">관리자 확인 중입니다</div>
+                                </div>
+                                <div class="mission-footer">
+                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
+                                </div>
+                            </div>
+                            <div class="pending-badge">대기중</div>
+                        </div>
+                    `}).join('');
+            }
+
+            // 완료
             if (completed.length === 0) {
                 completedDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>완료한 미션이 없습니다</div></div>';
             } else {
-                completedDiv.innerHTML = completed.map(mission => `
-                    <div class="mission-card completed">
-                        <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
-                        <div class="mission-content">
-                            <div>
-                                <div class="mission-title">${mission.title}</div>
-                                <div class="mission-description">완료된 미션입니다</div>
+                completedDiv.innerHTML = completed.map(item => {
+                    const categoryText = item.category === '10sec' ? '10초' : 
+                                       item.category === 'quiz' ? '퀴즈' : '설치';
+                    return `
+                        <div class="mission-card completed">
+                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
+                            <div class="mission-content">
+                                <div>
+                                    <div class="mission-title">
+                                        ${item.title}
+                                        <span class="category-badge">${categoryText}</span>
+                                    </div>
+                                    <div class="mission-description">완료된 미션입니다</div>
+                                </div>
+                                <div class="mission-footer">
+                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
+                                </div>
                             </div>
-                            <div class="mission-footer">
-                                <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
-                            </div>
+                            <div class="completed-badge">완료</div>
                         </div>
-                        <div class="completed-badge">완료</div>
-                    </div>
-                `).join('');
+                    `}).join('');
+            }
+
+            // 거절됨
+            if (rejected.length === 0) {
+                rejectedDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div>거절된 미션이 없습니다</div></div>';
+            } else {
+                rejectedDiv.innerHTML = rejected.map(item => {
+                    const categoryText = item.category === 'quiz' ? '퀴즈' : '설치';
+                    return `
+                        <div class="mission-card rejected">
+                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
+                            <div class="mission-content">
+                                <div>
+                                    <div class="mission-title">
+                                        ${item.title}
+                                        <span class="category-badge">${categoryText}</span>
+                                    </div>
+                                    <div class="mission-description">거절된 미션입니다</div>
+                                </div>
+                                <div class="mission-footer">
+                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
+                                </div>
+                            </div>
+                            <div class="rejected-badge">거절됨</div>
+                        </div>
+                    `}).join('');
             }
         }
 
@@ -356,12 +453,19 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
 
+            document.getElementById('ongoingMissions').style.display = 'none';
+            document.getElementById('pendingMissions').style.display = 'none';
+            document.getElementById('completedMissions').style.display = 'none';
+            document.getElementById('rejectedMissions').style.display = 'none';
+
             if (tab === 'ongoing') {
                 document.getElementById('ongoingMissions').style.display = 'block';
-                document.getElementById('completedMissions').style.display = 'none';
-            } else {
-                document.getElementById('ongoingMissions').style.display = 'none';
+            } else if (tab === 'pending') {
+                document.getElementById('pendingMissions').style.display = 'block';
+            } else if (tab === 'completed') {
                 document.getElementById('completedMissions').style.display = 'block';
+            } else if (tab === 'rejected') {
+                document.getElementById('rejectedMissions').style.display = 'block';
             }
         }
 
@@ -370,8 +474,25 @@
             if (!mission) return;
 
             currentMission = mission;
+            const modal = document.getElementById('missionModal');
+            
             document.getElementById('modalMissionTitle').textContent = currentMission.title;
-            document.getElementById('missionModal').classList.add('active');
+
+            if (currentMission.category === '10sec') {
+                document.getElementById('modalIcon').textContent = '⏱️';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '광고 페이지가 새 탭으로 열립니다.<br>10초 동안 머물러 있으면 즉시 보상이 지급됩니다!';
+            } else if (currentMission.category === 'quiz') {
+                document.getElementById('modalIcon').textContent = '❓';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '지금 누른 후 퀴즈를 풀고 "퀴즈 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
+            } else if (currentMission.category === 'install') {
+                document.getElementById('modalIcon').textContent = '📱';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '지금 누른 후 앱을 설치하고 "설치 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
+            }
+            
+            modal.classList.add('active');
         }
 
         function closeModal() {
@@ -385,69 +506,95 @@
             const userId = localStorage.getItem('userId');
             
             // 이미 완료했는지 체크
-            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&mission_id=eq.${currentMission.id}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const existing = await checkResponse.json();
+            const existing = userMissions.find(um => um.mission_id === currentMission.id);
             
-            if (existing.length > 0) {
-                alert('이미 완료한 미션입니다.');
+            if (existing) {
+                if (existing.status === 'completed') {
+                    alert('이미 완료한 미션입니다.');
+                } else if (existing.status === 'pending') {
+                    alert('이미 대기중인 미션입니다.');
+                } else if (existing.status === 'rejected') {
+                    alert('거절된 미션입니다. 다시 시도할 수 없습니다.');
+                }
                 closeModal();
                 return;
             }
 
-            // 미션 완료 처리
-            await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    mission_id: currentMission.id,
-                    cash_earned: currentMission.cash_reward
-                })
-            });
-
-            // 캐시 업데이트
-            const newCash = currentUser.cash + currentMission.cash_reward;
-            await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-                method: 'PATCH',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({ cash: newCash })
-            });
-
-            // 알림 생성
-            await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    type: 'mission',
-                    message: `미션 성공! "${currentMission.title}" 완료로 +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
-                })
-            });
-
             // 새 탭으로 링크 열기
             window.open(currentMission.link, '_blank');
 
+            // 10초형은 즉시 완료, 퀴즈/설치는 대기 상태로 저장
+            if (currentMission.category === '10sec') {
+                // 즉시 완료 처리
+                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        mission_id: currentMission.id,
+                        cash_earned: currentMission.cash_reward,
+                        status: 'completed'
+                    })
+                });
+
+                // 캐시 업데이트
+                const newCash = currentUser.cash + currentMission.cash_reward;
+                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ cash: newCash })
+                });
+
+                // 알림 생성
+                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        type: 'mission',
+                        message: `미션 성공! "${currentMission.title}" 완료로 +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`
+                    })
+                });
+
+                alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
+            } else {
+                // 퀴즈형/설치형은 대기 상태로 저장
+                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        mission_id: currentMission.id,
+                        cash_earned: currentMission.cash_reward,
+                        status: 'pending'
+                    })
+                });
+
+                const typeText = currentMission.category === 'quiz' ? '퀴즈 완료' : '설치 완료';
+                alert(`${typeText} 신청이 접수되었습니다.\n관리자 확인 후 24시간 이내에 보상이 지급됩니다.`);
+            }
+
             closeModal();
-            alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
-            
-            // 페이지 새로고침
             location.reload();
         }
     </script>
