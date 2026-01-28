@@ -518,6 +518,8 @@
         async function loadMissions() {
             const userId = localStorage.getItem('userId');
             
+            console.log('미션 로드 시작...');
+            
             // 활성 미션 가져오기
             const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc&limit=5`, {
                 headers: {
@@ -527,6 +529,7 @@
             });
 
             const missions = await missionsResponse.json();
+            console.log('가져온 미션:', missions);
 
             // 완료한 미션 가져오기
             const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
@@ -538,17 +541,20 @@
 
             const completed = await completedResponse.json();
             const completedIds = completed.map(c => c.mission_id);
+            console.log('완료한 미션 ID:', completedIds);
 
             const missionsList = document.getElementById('missionsList');
             
             if (missions.length === 0) {
+                console.log('미션이 없습니다');
                 missionsList.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>아직 미션이 없습니다</div></div>';
                 return;
             }
 
+            console.log('미션 카드 생성 중...');
             missionsList.innerHTML = missions.map(mission => `
                 <div class="mission-card" onclick="openMission('${mission.id}', ${completedIds.includes(mission.id)})">
-                    <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}">
+                    <img src="${mission.banner_url}" class="mission-banner" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'">
                     <div class="mission-info">
                         <div>
                             <div class="mission-title">${mission.title}</div>
@@ -558,6 +564,7 @@
                     </div>
                 </div>
             `).join('');
+            console.log('미션 카드 생성 완료');
         }
 
         // 미션 열기
