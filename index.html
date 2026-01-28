@@ -13,6 +13,852 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+        }
+
+        /* 컴팩트한 헤더 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-greeting {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .notification-badge {
+            display: none;
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            font-weight: bold;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-badge.active {
+            display: flex;
+        }
+
+        .cash-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .cash-amount {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .cash-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* 배너 슬라이더 */
+        .banner-slider {
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .banner-container {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .banner-slide {
+            min-width: 100%;
+            height: 200px;
+            position: relative;
+        }
+
+        .banner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .banner-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: white;
+            width: 20px;
+            border-radius: 3px;
+        }
+
+        /* 미션 섹션 */
+        .missions-section {
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .view-all-btn {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* 가로형 미션 카드 */
+        .mission-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mission-card:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .mission-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .mission-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .mission-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 4px;
+        }
+
+        .mission-description {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-bottom: 8px;
+        }
+
+        .mission-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mission-reward-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .completed-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(149, 165, 166, 0.95);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* 광고 섹션 */
+        .ad-section {
+            padding: 20px;
+            background: #f8f9fa;
+            margin-top: 20px;
+        }
+
+        .ad-container {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+
+        .modal-text {
+            color: #636e72;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .warning-text {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 10px;
+            color: #856404;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #dfe6e9;
+            color: #2d3436;
+            margin-top: 10px;
+        }
+
+        /* 알림 패널 */
+        .notification-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .notification-panel.active {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .notification-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .notification-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-item.unread {
+            background: #f0f3ff;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 컴팩트한 헤더 -->
+        <div class="header">
+            <div class="header-top">
+                <div class="user-greeting">
+                    <span id="userNickname">사용자</span>님 안녕하세요
+                </div>
+                <button class="notification-btn" onclick="toggleNotifications()">
+                    🔔
+                    <div class="notification-badge" id="notificationBadge"></div>
+                </button>
+            </div>
+            <div class="cash-info" onclick="location.href='me.html'">
+                <div class="cash-label">보유 캐시</div>
+                <div class="cash-amount"><span id="userCash">0</span> 캐시 ›</div>
+            </div>
+        </div>
+
+        <!-- 배너 슬라이더 -->
+        <div class="banner-slider">
+            <div class="banner-container" id="bannerContainer"></div>
+            <div class="banner-dots" id="bannerDots"></div>
+        </div>
+
+        <!-- 미션 섹션 -->
+        <div class="missions-section">
+            <div class="section-header">
+                <h2 class="section-title">🎯 진행 가능한 미션</h2>
+                <a href="missions.html" class="view-all-btn">전체보기 ›</a>
+            </div>
+            <div id="missionsList"></div>
+        </div>
+
+        <!-- 광고 섹션 -->
+        <div class="ad-section">
+            <div class="ad-container">
+                <iframe src="https://adpick.co.kr/nativeAD/ad.php?bannerType=type1&limit=1&affid=e1f79a&frameId=AdpickAdFrame_2026127%40234910&popup=false" width="100%" frameborder="0" scrolling="no" data-adpick_nativeAD id="AdpickAdFrame_2026127@234910" referrerpolicy="unsafe-url"></iframe>
+                <script src="https://adpick.co.kr/nativeAD/script.js" async="true"></script>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 네비게이션 -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            홈
+        </a>
+        <a href="missions.html" class="nav-item">
+            <span class="nav-icon">🎯</span>
+            미션
+        </a>
+        <a href="me.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            마이
+        </a>
+    </div>
+
+    <!-- 미션 확인 모달 -->
+    <div class="modal" id="missionModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ 미션 시작 안내</div>
+            <div class="modal-text">
+                광고 사이트에 <strong>10초 이상</strong> 머물러야 합니다.<br>
+                10초 전에 나가면 포인트가 회수됩니다.
+            </div>
+            <div class="warning-text">
+                📹 24시간 모니터링 중
+            </div>
+            <button class="modal-btn btn-primary" onclick="startMission()">확인</button>
+            <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
+        </div>
+    </div>
+
+    <!-- 알림 패널 -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>알림</h3>
+            <button class="close-btn" onclick="toggleNotifications()">×</button>
+        </div>
+        <div id="notificationsList"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+
+        let currentUser = null;
+        let currentMission = null;
+        let allBanners = [];
+        let currentBannerIndex = 0;
+        let bannerInterval = null;
+
+        // 페이지 로드 시
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            await loadUserData();
+            await loadBanners();
+            await loadMissions();
+            await loadNotifications();
+        });
+
+        // 사용자 데이터 로드
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const users = await response.json();
+            if (users.length > 0) {
+                currentUser = users[0];
+                document.getElementById('userNickname').textContent = currentUser.nickname;
+                document.getElementById('userCash').textContent = currentUser.cash.toLocaleString();
+            }
+        }
+
+        // 배너 로드 및 슬라이더 초기화
+        async function loadBanners() {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const missions = await response.json();
+            allBanners = missions;
+
+            if (allBanners.length === 0) {
+                document.querySelector('.banner-slider').innerHTML = '<div style="height: 200px; background: #ddd; display: flex; align-items: center; justify-content: center; color: #666;">등록된 배너가 없습니다</div>';
+                return;
+            }
+
+            const bannerContainer = document.getElementById('bannerContainer');
+            const bannerDots = document.getElementById('bannerDots');
+
+            bannerContainer.innerHTML = allBanners.map((mission, index) => `
+                <div class="banner-slide">
+                    <div class="banner-indicator">${index + 1}/${allBanners.length}</div>
+                    <img src="${mission.banner_url}" class="banner-image" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/600x200?text=No+Image'">
+                </div>
+            `).join('');
+
+            bannerDots.innerHTML = allBanners.map((_, index) => `
+                <div class="dot ${index === 0 ? 'active' : ''}" onclick="goToBanner(${index})"></div>
+            `).join('');
+
+            // 자동 슬라이드
+            startBannerSlider();
+        }
+
+        function startBannerSlider() {
+            bannerInterval = setInterval(() => {
+                currentBannerIndex = (currentBannerIndex + 1) % allBanners.length;
+                updateBannerSlide();
+            }, 3000);
+        }
+
+        function goToBanner(index) {
+            currentBannerIndex = index;
+            updateBannerSlide();
+            clearInterval(bannerInterval);
+            startBannerSlider();
+        }
+
+        function updateBannerSlide() {
+            const bannerContainer = document.getElementById('bannerContainer');
+            bannerContainer.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentBannerIndex);
+            });
+        }
+
+        // 미션 로드 (완료하지 않은 것만 최대 5개)
+        async function loadMissions() {
+            const userId = localStorage.getItem('userId');
+            
+            // 활성 미션 가져오기
+            const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const missions = await missionsResponse.json();
+
+            // 완료한 미션 가져오기
+            const completedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const completed = await completedResponse.json();
+            const completedIds = completed.map(c => c.mission_id);
+
+            // 완료하지 않은 미션만 필터링하고 최대 5개
+            const incompleteMissions = missions.filter(m => !completedIds.includes(m.id)).slice(0, 5);
+
+            const missionsList = document.getElementById('missionsList');
+            
+            if (incompleteMissions.length === 0) {
+                missionsList.innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><div>모든 미션을 완료했습니다!</div></div>';
+                return;
+            }
+
+            missionsList.innerHTML = incompleteMissions.map(mission => `
+                <div class="mission-card" onclick="openMission('${mission.id}', false)">
+                    <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}" onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                    <div class="mission-content">
+                        <div>
+                            <div class="mission-title">${mission.title}</div>
+                            <div class="mission-description">광고 보고 캐시 받기</div>
+                        </div>
+                        <div class="mission-footer">
+                            <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()} 캐시</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 미션 열기
+        function openMission(missionId, isCompleted) {
+            fetch(`${SUPABASE_URL}/rest/v1/missions?id=eq.${missionId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            })
+            .then(res => res.json())
+            .then(missions => {
+                if (missions.length > 0) {
+                    currentMission = missions[0];
+                    
+                    if (isCompleted) {
+                        // 완료된 미션도 링크 이동 가능
+                        window.open(currentMission.link, '_blank');
+                    } else {
+                        document.getElementById('missionModal').classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('missionModal').classList.remove('active');
+            currentMission = null;
+        }
+
+        // 미션 시작
+        function startMission() {
+            if (!currentMission) return;
+
+            const missionWindow = window.open(currentMission.link, '_blank');
+            closeModal();
+
+            // 10초 후 미션 완료 처리
+            setTimeout(async () => {
+                const userId = localStorage.getItem('userId');
+                
+                // 미션 완료 기록
+                await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        mission_id: currentMission.id,
+                        cash_earned: currentMission.cash_reward
+                    })
+                });
+
+                // 캐시 업데이트
+                const newCash = currentUser.cash + currentMission.cash_reward;
+                await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ cash: newCash })
+                });
+
+                // 알림 생성
+                await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        message: `"${currentMission.title}" 미션 완료! +${currentMission.cash_reward.toLocaleString()} 캐시가 적립되었습니다.`
+                    })
+                });
+
+                alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()} 캐시가 적립되었습니다.`);
+                location.reload();
+            }, 10000);
+        }
+
+        // 알림 로드
+        async function loadNotifications() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${userId}&order=created_at.desc&limit=20`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const notifications = await response.json();
+            const unreadCount = notifications.filter(n => !n.is_read).length;
+
+            if (unreadCount > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = unreadCount;
+                badge.classList.add('active');
+            }
+
+            const notificationsList = document.getElementById('notificationsList');
+            
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><div>알림이 없습니다</div></div>';
+                return;
+            }
+
+            notificationsList.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${!notif.is_read ? 'unread' : ''}">
+                    <div>${notif.message}</div>
+                    <div class="notification-time">${new Date(notif.created_at).toLocaleString('ko-KR')}</div>
+                </div>
+            `).join('');
+        }
+
+        // 알림 패널 토글
+        function toggleNotifications() {
+            const panel = document.getElementById('notificationPanel');
+            panel.classList.toggle('active');
+
+            if (panel.classList.contains('active')) {
+                // 모든 알림을 읽음으로 표시
+                const userId = localStorage.getItem('userId');
+                fetch(`${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ is_read: true })
+                }).then(() => {
+                    document.getElementById('notificationBadge').classList.remove('active');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding-bottom: 80px;
