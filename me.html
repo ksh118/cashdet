@@ -3,66 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>codetbase | 내 정보</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>마이페이지 - 캐시뎃</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background: #f4f7ff; }
-        .top { background: #0052D4; color: white; padding: 40px 20px; border-radius: 0 0 30px 30px; text-align: center; }
-        .card { background: white; margin: -20px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .menu { padding: 15px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        input { padding: 8px; border: 1px solid #ddd; border-radius: 8px; width: 60%; }
-        button { padding: 8px 15px; background: #0052D4; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 15px;
+        }
+
+        .nickname {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .email {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .cash-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .cash-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .cash-amount {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        .menu-section {
+            padding: 20px;
+        }
+
+        .menu-item {
+            background: white;
+            padding: 18px 20px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .menu-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+        }
+
+        .menu-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .menu-arrow {
+            color: #95a5a6;
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .close-btn {
+            background: #f1f2f6;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-title {
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .history-amount {
+            color: #27ae60;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <div class="profile-section">
+                <div class="profile-icon">👤</div>
+                <div class="nickname" id="userNickname">사용자</div>
+                <div class="email" id="userEmail">user@example.com</div>
+            </div>
+            <div class="cash-card">
+                <div class="cash-label">보유 캐시</div>
+                <div class="cash-amount"><span id="userCash">0</span> 원</div>
+            </div>
+        </div>
 
-<div class="top">
-    <h2 id="m-nick" style="margin:0">회원님</h2>
-    <div id="m-cash" style="font-size:36px; font-weight:bold; margin-top:10px;">0 c</div>
-</div>
+        <div class="menu-section">
+            <div class="menu-item" onclick="showHistory()">
+                <div class="menu-left">
+                    <div class="menu-icon">📊</div>
+                    <div class="menu-text">적립 내역</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
 
-<div class="card">
-    <h3>계정 설정</h3>
-    <div class="menu">
-        <span>닉네임</span>
-        <div>
-            <input type="text" id="new-nick">
-            <button onclick="saveNick()">변경</button>
+            <div class="menu-item" onclick="showSettings()">
+                <div class="menu-left">
+                    <div class="menu-icon">⚙️</div>
+                    <div class="menu-text">설정</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
     </div>
-    <div class="menu" style="border:none;">
-        <span>로그아웃</span>
-        <span onclick="logout()" style="color:red; cursor:pointer;">Logout →</span>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            홈
+        </a>
+        <a href="missions.html" class="nav-item">
+            <span class="nav-icon">🎯</span>
+            미션
+        </a>
+        <a href="me.html" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            마이
+        </a>
     </div>
-</div>
 
-<div class="nav">
-    <div onclick="location.href='index.html'">🏠<br>홈</div>
-    <div onclick="location.href='m.html'">💰<br>미션</div>
-    <div onclick="location.href='me.html'">👤<br>내정보</div>
-</div>
+    <!-- 적립내역 모달 -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📊 적립 내역</div>
+                <button class="close-btn" onclick="closeModal('historyModal')">×</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
 
-<script>
-    const client = supabase.createClient('URL', 'KEY');
+    <!-- 설정 모달 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ 설정</div>
+                <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
+            </div>
+            <form onsubmit="saveSettings(event)">
+                <div class="form-group">
+                    <label class="form-label">닉네임</label>
+                    <input type="text" class="form-input" id="settingsNickname" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">새 비밀번호 (변경 시에만 입력)</label>
+                    <input type="password" class="form-input" id="settingsPassword" placeholder="변경하지 않으려면 비워두세요">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호 확인</label>
+                    <input type="password" class="form-input" id="settingsPasswordConfirm">
+                </div>
+                <button type="submit" class="save-btn">저장하기</button>
+            </form>
+        </div>
+    </div>
 
-    async function load() {
-        const { data: { session } } = await client.auth.getSession();
-        if(!session) return location.href='index.html';
-        const { data: p } = await client.from('profiles').select('*').eq('id', session.user.id).single();
-        document.getElementById('m-nick').innerText = p.nickname || '회원님';
-        document.getElementById('m-cash').innerText = p.cash.toLocaleString() + ' c';
-    }
+    <script>
+        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
-    async function saveNick() {
-        const { data: { session } } = await client.auth.getSession();
-        const nick = document.getElementById('new-nick').value;
-        await client.from('profiles').update({ nickname: nick }).eq('id', session.user.id);
-        alert("저장되었습니다."); location.reload();
-    }
+        let currentUser = null;
 
-    async function logout() { await client.auth.signOut(); location.href='index.html'; }
-    load();
-</script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            await loadUserData();
+        });
+
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const users = await response.json();
+            if (users.length > 0) {
+                currentUser = users[0];
+                document.getElementById('userNickname').textContent = currentUser.nickname;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userCash').textContent = currentUser.cash.toLocaleString();
+            }
+        }
+
+        async function showHistory() {
+            const userId = localStorage.getItem('userId');
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_missions?user_id=eq.${userId}&order=completed_at.desc`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            const history = await response.json();
+
+            // 미션 정보도 가져오기
+            const missionIds = history.map(h => h.mission_id).join(',');
+            if (missionIds) {
+                const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?id=in.(${missionIds})`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                const missions = await missionsResponse.json();
+                const missionMap = {};
+                missions.forEach(m => missionMap[m.id] = m);
+
+                const historyList = document.getElementById('historyList');
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
+                } else {
+                    historyList.innerHTML = history.map(item => {
+                        const mission = missionMap[item.mission_id];
+                        return `
+                            <div class="history-item">
+                                <div class="history-title">${mission ? mission.title : '미션'}</div>
+                                <div class="history-amount">+${item.cash_earned.toLocaleString()}원</div>
+                                <div class="history-date">${new Date(item.completed_at).toLocaleString('ko-KR')}</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } else {
+                document.getElementById('historyList').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>적립 내역이 없습니다</div></div>';
+            }
+
+            document.getElementById('historyModal').classList.add('active');
+        }
+
+        function showSettings() {
+            document.getElementById('settingsNickname').value = currentUser.nickname;
+            document.getElementById('settingsPassword').value = '';
+            document.getElementById('settingsPasswordConfirm').value = '';
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        async function saveSettings(event) {
+            event.preventDefault();
+
+            const nickname = document.getElementById('settingsNickname').value;
+            const password = document.getElementById('settingsPassword').value;
+            const passwordConfirm = document.getElementById('settingsPasswordConfirm').value;
+
+            if (password && password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            const userId = localStorage.getItem('userId');
+            const updateData = { nickname };
+
+            if (password) {
+                updateData.password = password;
+            }
+
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (response.ok) {
+                alert('설정이 저장되었습니다.');
+                closeModal('settingsModal');
+                await loadUserData();
+            } else {
+                alert('설정 저장에 실패했습니다.');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('userId');
+                location.href = 'login.html';
+            }
+        }
+    </script>
 </body>
 </html>
