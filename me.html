@@ -178,7 +178,7 @@
         <div class="header">
             <div class="profile-icon">👤</div>
             <div class="nickname" id="userNickname">사용자</div>
-            <div class="email" id="userEmail">email@example.com</div>
+            <div class="email" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3d58505c54517d58455c504d5158135e5250">[email&#160;protected]</a></div>
             <div class="cash-card">
                 <div class="cash-label">보유 캐시</div>
                 <div class="cash-amount"><span id="userCash">0</span> 원</div>
@@ -206,6 +206,14 @@
                 <div class="menu-left">
                     <div class="menu-icon">💌</div>
                     <div class="menu-text">답변 확인</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="location.href='my-coupons.html'">
+                <div class="menu-left">
+                    <div class="menu-icon">🎟️</div>
+                    <div class="menu-text">쿠폰함</div>
                 </div>
                 <div class="menu-arrow">›</div>
             </div>
@@ -288,7 +296,7 @@
         </div>
     </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
 
@@ -428,12 +436,4 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        function logout() {
-            if (confirm('로그아웃 하시겠습니까?')) {
-                localStorage.removeItem('userId');
-                location.href = 'login.html';
-            }
-        }
-    </script>
-</body>
-</html>
+        functi
