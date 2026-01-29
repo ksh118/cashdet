@@ -53,6 +53,35 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: white;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .category-filter {
+            padding: 8px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            background: white;
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .category-filter.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .category-filter:hover {
+            border-color: #667eea;
+        }
+
         .missions-section { padding: 20px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 700; color: #2d3436; }
@@ -92,6 +121,14 @@
             border-radius: 12px;
             font-weight: 700;
             font-size: 13px;
+        }
+        .category-badge {
+            background: #e17055;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         .bottom-nav {
@@ -228,6 +265,13 @@
             <div class="banner-container" id="bannerContainer"></div>
         </div>
 
+        <div class="category-filters">
+            <button class="category-filter active" data-category="all" onclick="filterMissions('all')">전체</button>
+            <button class="category-filter" data-category="10sec" onclick="filterMissions('10sec')">⏱️ 10초 시청</button>
+            <button class="category-filter" data-category="quiz" onclick="filterMissions('quiz')">❓ 퀴즈</button>
+            <button class="category-filter" data-category="install" onclick="filterMissions('install')">📱 앱 설치</button>
+        </div>
+
         <div class="missions-section">
             <div class="section-header">
                 <div class="section-title">🎯 오늘의 미션</div>
@@ -262,7 +306,7 @@
 
     <div class="modal" id="missionModal">
         <div class="modal-content">
-            <div class="modal-icon">🎯</div>
+            <div class="modal-icon" id="modalIcon">🎯</div>
             <div class="modal-title" id="modalMissionTitle">미션을 시작하시겠습니까?</div>
             <div class="modal-description" id="modalMissionDescription">
                 광고 페이지가 새 탭으로 열립니다.<br>
@@ -304,12 +348,14 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://apuiydnqimlmeqpftijl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwdWl5ZG5xaW1sbWVxcGZ0aWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTgzMDAsImV4cCI6MjA4NTA5NDMwMH0.G7CvTQLEsIzkhJfsa67ou28Pbt8J5bkbEvyEgSRziXI';
+        const SUPABASE_URL = 'https://lsikcchvkwhlucrqkbhk.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzaWtjY2h2a3dobHVjcnFrYmhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc3OTE2MjksImV4cCI6MjA1MzM2NzYyOX0.9OC3l08szvzVPOQfvX1OzHTGfCDukFWKxSzYNrjCT7o';
 
         let currentUser = null;
         let currentMission = null;
         let currentAdminMessage = null;
+        let allMissions = [];
+        let currentCategory = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
             const userId = localStorage.getItem('userId');
@@ -346,17 +392,13 @@
 
         async function loadBanners() {
             try {
-                console.log('배너 로드 시작...');
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/banners?is_active=eq.true&order=created_at.desc`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 
-                console.log('배너 응답 상태:', response.status);
                 const banners = await response.json();
-                console.log('로드된 배너 수:', banners.length);
 
                 if (!banners || banners.length === 0) {
-                    console.log('배너 없음 - 슬라이더 숨김');
                     document.getElementById('bannerSlider').style.display = 'none';
                     return;
                 }
@@ -367,8 +409,6 @@
                         <img src="${banner.image_url}" class="banner-image" alt="배너" ${banner.link ? `onclick="window.open('${banner.link}', '_blank')" style="cursor: pointer;"` : ''}>
                     </div>
                 `).join('');
-
-                console.log('배너 렌더링 완료');
             } catch (error) {
                 console.error('배너 로드 오류:', error);
                 document.getElementById('bannerSlider').style.display = 'none';
@@ -379,7 +419,7 @@
             const userId = localStorage.getItem('userId');
             
             try {
-                const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?is_active=eq.true&order=created_at.desc&limit=5`, {
+                const missionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/missions?order=created_at.desc`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 const missions = await missionsResponse.json();
@@ -389,52 +429,87 @@
                 });
                 const completed = await completedResponse.json();
                 const completedIds = completed.map(c => c.mission_id);
-
-                const missionsList = document.getElementById('missionsList');
                 
-                const availableMissions = missions.filter(m => !completedIds.includes(m.id));
-                
-                if (availableMissions.length === 0) {
-                    missionsList.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>모든 미션을 완료했습니다!</div></div>';
-                    return;
-                }
-
-                missionsList.innerHTML = availableMissions.map(mission => `
-                    <div class="mission-card" onclick="openMission('${mission.id}')">
-                        <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
-                        <div class="mission-content">
-                            <div>
-                                <div class="mission-title">${mission.title}</div>
-                                <div class="mission-description">${mission.description}</div>
-                            </div>
-                            <div class="mission-footer">
-                                <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                allMissions = missions.filter(m => !completedIds.includes(m.id));
+                renderMissions();
             } catch (error) {
                 console.error('미션 로드 오류:', error);
                 document.getElementById('missionsList').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div>미션을 불러올 수 없습니다</div></div>';
             }
         }
 
-        async function openMission(missionId) {
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/missions?id=eq.${missionId}`, {
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-                });
-                const missions = await response.json();
-                
-                if (missions.length > 0) {
-                    currentMission = missions[0];
-                    document.getElementById('modalMissionTitle').textContent = currentMission.title;
-                    document.getElementById('modalMissionReward').textContent = `+${currentMission.cash_reward.toLocaleString()}원`;
-                    document.getElementById('missionModal').classList.add('active');
-                }
-            } catch (error) {
-                console.error('미션 열기 오류:', error);
+        function filterMissions(category) {
+            currentCategory = category;
+            
+            document.querySelectorAll('.category-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderMissions();
+        }
+
+        function renderMissions() {
+            const missionsList = document.getElementById('missionsList');
+            
+            let filteredMissions = allMissions;
+            if (currentCategory !== 'all') {
+                filteredMissions = allMissions.filter(m => m.category === currentCategory);
             }
+            
+            const displayMissions = filteredMissions.slice(0, 5);
+            
+            if (displayMissions.length === 0) {
+                missionsList.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>미션이 없습니다</div></div>';
+                return;
+            }
+
+            missionsList.innerHTML = displayMissions.map(mission => {
+                const categoryText = mission.category === '10sec' ? '10초' : 
+                                   mission.category === 'quiz' ? '퀴즈' : '설치';
+                return `
+                <div class="mission-card" onclick="openMission('${mission.id}')">
+                    <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
+                    <div class="mission-content">
+                        <div>
+                            <div class="mission-title">
+                                ${mission.title}
+                                <span class="category-badge">${categoryText}</span>
+                            </div>
+                            <div class="mission-description">${mission.description}</div>
+                        </div>
+                        <div class="mission-footer">
+                            <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
+                        </div>
+                    </div>
+                </div>
+            `;}).join('');
+        }
+
+        async function openMission(missionId) {
+            const mission = allMissions.find(m => m.id === missionId);
+            if (!mission) return;
+
+            currentMission = mission;
+            
+            document.getElementById('modalMissionTitle').textContent = currentMission.title;
+            document.getElementById('modalMissionReward').textContent = `+${currentMission.cash_reward.toLocaleString()}원`;
+
+            if (currentMission.category === '10sec') {
+                document.getElementById('modalIcon').textContent = '⏱️';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '광고 페이지가 새 탭으로 열립니다.<br>10초 동안 머물러 있으면 즉시 보상이 지급됩니다!';
+            } else if (currentMission.category === 'quiz') {
+                document.getElementById('modalIcon').textContent = '❓';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '지금 누른 후 퀴즈를 풀고 "퀴즈 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
+            } else if (currentMission.category === 'install') {
+                document.getElementById('modalIcon').textContent = '📱';
+                document.getElementById('modalMissionDescription').innerHTML = 
+                    '지금 누른 후 앱을 설치하고 "설치 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
+            }
+            
+            document.getElementById('missionModal').classList.add('active');
         }
 
         function closeModal() {
@@ -443,7 +518,70 @@
         }
 
         async function startMission() {
-            location.href = 'missions.html';
+            if (!currentMission) return;
+
+            const userId = localStorage.getItem('userId');
+
+            window.open(currentMission.link, '_blank');
+
+            try {
+                if (currentMission.category === '10sec') {
+                    await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            mission_id: currentMission.id,
+                            cash_earned: currentMission.cash_reward,
+                            status: 'completed'
+                        })
+                    });
+
+                    const newCash = currentUser.cash + currentMission.cash_reward;
+                    await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({ cash: newCash })
+                    });
+
+                    alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
+                } else {
+                    await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            mission_id: currentMission.id,
+                            cash_earned: currentMission.cash_reward,
+                            status: 'pending'
+                        })
+                    });
+
+                    const typeText = currentMission.category === 'quiz' ? '퀴즈 완료' : '설치 완료';
+                    alert(`${typeText} 신청이 접수되었습니다.\n관리자 확인 후 24시간 이내에 보상이 지급됩니다.`);
+                }
+
+                closeModal();
+                location.reload();
+            } catch (error) {
+                console.error('미션 처리 오류:', error);
+                alert('미션 처리 중 오류가 발생했습니다.');
+            }
         }
 
         function showAttendanceModal() {
