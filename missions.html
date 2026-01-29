@@ -56,7 +56,6 @@
         .tab.active { color: #667eea; border-bottom-color: #667eea; }
         .missions-container { padding: 20px; }
         
-        /* 가로형 미션 카드 */
         .mission-card {
             background: #f8f9fa;
             border-radius: 12px;
@@ -69,7 +68,6 @@
             position: relative;
         }
         .mission-card:hover { transform: translateX(3px); background: #e9ecef; }
-        .mission-card.completed { opacity: 0.7; }
         .mission-card.pending { background: #fff3cd; border-left: 4px solid #ffc107; }
         .mission-card.rejected { background: #f8d7da; border-left: 4px solid #dc3545; }
         .mission-thumbnail {
@@ -105,7 +103,7 @@
             font-weight: 600;
             margin-left: 5px;
         }
-        .completed-badge, .pending-badge, .rejected-badge {
+        .status-badge {
             position: absolute;
             top: 12px;
             right: 12px;
@@ -148,7 +146,6 @@
         .nav-item.active { color: #667eea; }
         .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
 
-        /* 모달 */
         .modal {
             display: none;
             position: fixed;
@@ -170,25 +167,10 @@
             width: 90%;
             text-align: center;
         }
-        .modal-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2d3436;
-            margin-bottom: 10px;
-        }
-        .modal-description {
-            color: #636e72;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .modal-icon { font-size: 64px; margin-bottom: 20px; }
+        .modal-title { font-size: 22px; font-weight: 700; color: #2d3436; margin-bottom: 10px; }
+        .modal-description { color: #636e72; margin-bottom: 30px; line-height: 1.6; }
+        .modal-buttons { display: flex; gap: 10px; }
         .modal-btn {
             flex: 1;
             padding: 15px;
@@ -203,14 +185,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #f1f2f6;
-            color: #2d3436;
-        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #f1f2f6; color: #2d3436; }
         .btn-secondary:hover { background: #dfe6e9; }
     </style>
 </head>
@@ -224,10 +200,10 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('ongoing')">진행 중</div>
-            <div class="tab" onclick="switchTab('pending')">대기중</div>
-            <div class="tab" onclick="switchTab('completed')">완료</div>
-            <div class="tab" onclick="switchTab('rejected')">거절됨</div>
+            <div class="tab active" data-tab="ongoing">진행 중</div>
+            <div class="tab" data-tab="pending">대기중</div>
+            <div class="tab" data-tab="completed">완료</div>
+            <div class="tab" data-tab="rejected">거절됨</div>
         </div>
 
         <div class="missions-container" id="ongoingMissions"></div>
@@ -240,6 +216,10 @@
         <a href="index.html" class="nav-item">
             <span class="nav-icon">🏠</span>
             홈
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="location.href='index.html'; setTimeout(() => showAttendanceModal(), 100);">
+            <span class="nav-icon">📅</span>
+            출석
         </a>
         <a href="missions.html" class="nav-item active">
             <span class="nav-icon">🎯</span>
@@ -255,7 +235,6 @@
         </a>
     </div>
 
-    <!-- 미션 안내 모달 -->
     <div class="modal" id="missionModal">
         <div class="modal-content">
             <div class="modal-icon" id="modalIcon">🎯</div>
@@ -276,7 +255,6 @@
         let currentMission = null;
         let allMissions = [];
         let userMissions = [];
-        let currentTab = 'ongoing';
 
         document.addEventListener('DOMContentLoaded', async () => {
             const userId = localStorage.getItem('userId');
@@ -287,7 +265,17 @@
 
             await loadUserData();
             await loadAllMissions();
+            setupTabs();
         });
+
+        function setupTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+        }
 
         async function loadUserData() {
             const userId = localStorage.getItem('userId');
@@ -336,137 +324,80 @@
                 }
             });
 
-            const ongoingDiv = document.getElementById('ongoingMissions');
-            const pendingDiv = document.getElementById('pendingMissions');
-            const completedDiv = document.getElementById('completedMissions');
-            const rejectedDiv = document.getElementById('rejectedMissions');
-
-            // 진행 중
-            if (ongoing.length === 0) {
-                ongoingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><div>진행 가능한 미션이 없습니다!</div></div>';
-            } else {
-                ongoingDiv.innerHTML = ongoing.map(item => {
-                    const categoryText = item.category === '10sec' ? '10초' : 
-                                       item.category === 'quiz' ? '퀴즈' : '설치';
-                    return `
-                        <div class="mission-card" onclick="openMission('${item.id}')">
-                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
-                            <div class="mission-content">
-                                <div>
-                                    <div class="mission-title">
-                                        ${item.title}
-                                        <span class="category-badge">${categoryText}</span>
-                                    </div>
-                                    <div class="mission-description">${item.description}</div>
-                                </div>
-                                <div class="mission-footer">
-                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
-                                </div>
-                            </div>
-                        </div>
-                    `}).join('');
-            }
-
-            // 대기중
-            if (pending.length === 0) {
-                pendingDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div>대기중인 미션이 없습니다</div></div>';
-            } else {
-                pendingDiv.innerHTML = pending.map(item => {
-                    const categoryText = item.category === 'quiz' ? '퀴즈' : '설치';
-                    return `
-                        <div class="mission-card pending">
-                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
-                            <div class="mission-content">
-                                <div>
-                                    <div class="mission-title">
-                                        ${item.title}
-                                        <span class="category-badge">${categoryText}</span>
-                                    </div>
-                                    <div class="mission-description">관리자 확인 중입니다</div>
-                                </div>
-                                <div class="mission-footer">
-                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
-                                </div>
-                            </div>
-                            <div class="pending-badge">대기중</div>
-                        </div>
-                    `}).join('');
-            }
-
-            // 완료
-            if (completed.length === 0) {
-                completedDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>완료한 미션이 없습니다</div></div>';
-            } else {
-                completedDiv.innerHTML = completed.map(item => {
-                    const categoryText = item.category === '10sec' ? '10초' : 
-                                       item.category === 'quiz' ? '퀴즈' : '설치';
-                    return `
-                        <div class="mission-card completed">
-                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
-                            <div class="mission-content">
-                                <div>
-                                    <div class="mission-title">
-                                        ${item.title}
-                                        <span class="category-badge">${categoryText}</span>
-                                    </div>
-                                    <div class="mission-description">완료된 미션입니다</div>
-                                </div>
-                                <div class="mission-footer">
-                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
-                                </div>
-                            </div>
-                            <div class="completed-badge">완료</div>
-                        </div>
-                    `}).join('');
-            }
-
-            // 거절됨
-            if (rejected.length === 0) {
-                rejectedDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div>거절된 미션이 없습니다</div></div>';
-            } else {
-                rejectedDiv.innerHTML = rejected.map(item => {
-                    const categoryText = item.category === 'quiz' ? '퀴즈' : '설치';
-                    return `
-                        <div class="mission-card rejected">
-                            <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
-                            <div class="mission-content">
-                                <div>
-                                    <div class="mission-title">
-                                        ${item.title}
-                                        <span class="category-badge">${categoryText}</span>
-                                    </div>
-                                    <div class="mission-description">거절된 미션입니다</div>
-                                </div>
-                                <div class="mission-footer">
-                                    <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
-                                </div>
-                            </div>
-                            <div class="rejected-badge">거절됨</div>
-                        </div>
-                    `}).join('');
-            }
+            renderMissionList('ongoingMissions', ongoing, 'ongoing');
+            renderMissionList('pendingMissions', pending, 'pending');
+            renderMissionList('completedMissions', completed, 'completed');
+            renderMissionList('rejectedMissions', rejected, 'rejected');
         }
 
-        function switchTab(tab) {
-            currentTab = tab;
+        function renderMissionList(containerId, missions, type) {
+            const container = document.getElementById(containerId);
             
+            if (missions.length === 0) {
+                const emptyMessages = {
+                    ongoing: '진행 가능한 미션이 없습니다!',
+                    pending: '대기중인 미션이 없습니다',
+                    completed: '완료한 미션이 없습니다',
+                    rejected: '거절된 미션이 없습니다'
+                };
+                container.innerHTML = `<div class="empty-state"><div class="empty-icon">✨</div><div>${emptyMessages[type]}</div></div>`;
+                return;
+            }
+
+            container.innerHTML = missions.map(item => {
+                const categoryText = item.category === '10sec' ? '10초' : 
+                                   item.category === 'quiz' ? '퀴즈' : '설치';
+                
+                let statusBadge = '';
+                let cardClass = 'mission-card';
+                let description = item.description;
+
+                if (type === 'pending') {
+                    statusBadge = '<div class="status-badge pending-badge">대기중</div>';
+                    cardClass = 'mission-card pending';
+                    description = '관리자 확인 중입니다';
+                } else if (type === 'completed') {
+                    statusBadge = '<div class="status-badge completed-badge">완료</div>';
+                    description = '완료된 미션입니다';
+                } else if (type === 'rejected') {
+                    statusBadge = '<div class="status-badge rejected-badge">거절됨</div>';
+                    cardClass = 'mission-card rejected';
+                    description = '거절된 미션입니다';
+                }
+
+                const clickHandler = type === 'ongoing' ? `onclick="openMission('${item.id}')"` : '';
+
+                return `
+                    <div class="${cardClass}" ${clickHandler}>
+                        <img src="${item.banner_url}" class="mission-thumbnail" alt="${item.title}">
+                        <div class="mission-content">
+                            <div>
+                                <div class="mission-title">
+                                    ${item.title}
+                                    <span class="category-badge">${categoryText}</span>
+                                </div>
+                                <div class="mission-description">${description}</div>
+                            </div>
+                            <div class="mission-footer">
+                                <div class="mission-reward-badge">+${item.cash_reward.toLocaleString()}원</div>
+                            </div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
 
             document.getElementById('ongoingMissions').style.display = 'none';
             document.getElementById('pendingMissions').style.display = 'none';
             document.getElementById('completedMissions').style.display = 'none';
             document.getElementById('rejectedMissions').style.display = 'none';
 
-            if (tab === 'ongoing') {
-                document.getElementById('ongoingMissions').style.display = 'block';
-            } else if (tab === 'pending') {
-                document.getElementById('pendingMissions').style.display = 'block';
-            } else if (tab === 'completed') {
-                document.getElementById('completedMissions').style.display = 'block';
-            } else if (tab === 'rejected') {
-                document.getElementById('rejectedMissions').style.display = 'block';
-            }
+            document.getElementById(tabName + 'Missions').style.display = 'block';
         }
 
         async function openMission(missionId) {
@@ -474,7 +405,6 @@
             if (!mission) return;
 
             currentMission = mission;
-            const modal = document.getElementById('missionModal');
             
             document.getElementById('modalMissionTitle').textContent = currentMission.title;
 
@@ -492,7 +422,7 @@
                     '지금 누른 후 앱을 설치하고 "설치 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
             }
             
-            modal.classList.add('active');
+            document.getElementById('missionModal').classList.add('active');
         }
 
         function closeModal() {
@@ -505,7 +435,6 @@
 
             const userId = localStorage.getItem('userId');
             
-            // 이미 완료했는지 체크
             const existing = userMissions.find(um => um.mission_id === currentMission.id);
             
             if (existing) {
@@ -514,18 +443,15 @@
                 } else if (existing.status === 'pending') {
                     alert('이미 대기중인 미션입니다.');
                 } else if (existing.status === 'rejected') {
-                    alert('거절된 미션입니다. 다시 시도할 수 없습니다.');
+                    alert('거절된 미션입니다.');
                 }
                 closeModal();
                 return;
             }
 
-            // 새 탭으로 링크 열기
             window.open(currentMission.link, '_blank');
 
-            // 10초형은 즉시 완료, 퀴즈/설치는 대기 상태로 저장
             if (currentMission.category === '10sec') {
-                // 즉시 완료 처리
                 await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
                     method: 'POST',
                     headers: {
@@ -542,7 +468,6 @@
                     })
                 });
 
-                // 캐시 업데이트
                 const newCash = currentUser.cash + currentMission.cash_reward;
                 await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
                     method: 'PATCH',
@@ -555,7 +480,6 @@
                     body: JSON.stringify({ cash: newCash })
                 });
 
-                // 알림 생성
                 await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
                     method: 'POST',
                     headers: {
@@ -573,7 +497,6 @@
 
                 alert(`미션 완료! +${currentMission.cash_reward.toLocaleString()}원이 적립되었습니다.`);
             } else {
-                // 퀴즈형/설치형은 대기 상태로 저장
                 await fetch(`${SUPABASE_URL}/rest/v1/user_missions`, {
                     method: 'POST',
                     headers: {
