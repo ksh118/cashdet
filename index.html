@@ -238,50 +238,6 @@
         }
         .btn-secondary:hover { background: #dfe6e9; }
 
-        /* 출석 체크 */
-        .attendance-section {
-            padding: 20px;
-            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            margin: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-        .attendance-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3436;
-            margin-bottom: 10px;
-        }
-        .attendance-reward {
-            font-size: 24px;
-            font-weight: 700;
-            color: #d63031;
-            margin-bottom: 15px;
-        }
-        .attendance-btn {
-            background: white;
-            color: #2d3436;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .attendance-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .attendance-btn:disabled {
-            background: #dfe6e9;
-            cursor: not-allowed;
-        }
-        .attendance-timer {
-            font-size: 12px;
-            color: #636e72;
-            margin-top: 10px;
-        }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -351,14 +307,6 @@
             <div class="banner-dots" id="bannerDots"></div>
         </div>
 
-        <!-- 출석 체크 -->
-        <div class="attendance-section">
-            <div class="attendance-title">📅 오늘의 출석 체크</div>
-            <div class="attendance-reward" id="attendanceReward">+0원</div>
-            <button class="attendance-btn" id="attendanceBtn" onclick="checkAttendance()">출석 체크하기</button>
-            <div class="attendance-timer" id="attendanceTimer"></div>
-        </div>
-
         <!-- 미션 섹션 -->
         <div class="missions-section">
             <div class="section-header">
@@ -373,6 +321,10 @@
         <a href="index.html" class="nav-item active">
             <span class="nav-icon">🏠</span>
             홈
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showAttendanceModal()">
+            <span class="nav-icon">📅</span>
+            출석
         </a>
         <a href="missions.html" class="nav-item">
             <span class="nav-icon">🎯</span>
@@ -402,6 +354,23 @@
                 <button class="modal-btn btn-primary" onclick="startMission()">시작하기</button>
                 <button class="modal-btn btn-secondary" onclick="closeModal()">취소</button>
             </div>
+        </div>
+    </div>
+
+    <!-- 출석 모달 -->
+    <div class="modal" id="attendanceModal">
+        <div class="modal-content">
+            <div class="modal-icon">📅</div>
+            <div class="modal-title">오늘의 출석 체크</div>
+            <div class="modal-reward" id="attendanceReward">+0원</div>
+            <div class="modal-description" id="attendanceDescription">
+                매일 출석하고 캐시를 받아가세요!
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-primary" id="attendanceBtn" onclick="checkAttendance()">출석 체크하기</button>
+                <button class="modal-btn btn-secondary" onclick="closeAttendanceModal()">취소</button>
+            </div>
+            <div class="attendance-timer" id="attendanceTimer" style="margin-top: 15px; font-size: 12px; color: #636e72;"></div>
         </div>
     </div>
 
@@ -473,6 +442,14 @@
                 currentAdminMessage = messages[0];
                 showAdminMessage(currentAdminMessage);
             }
+        }
+
+        function showAttendanceModal() {
+            document.getElementById('attendanceModal').classList.add('active');
+        }
+
+        function closeAttendanceModal() {
+            document.getElementById('attendanceModal').classList.remove('active');
         }
 
         function showAdminMessage(message) {
