@@ -471,6 +471,7 @@
             missionsList.innerHTML = displayMissions.map(mission => {
                 const categoryText = mission.category === '10sec' ? '10초' : 
                                    mission.category === 'quiz' ? '퀴즈' : '설치';
+                const description = mission.description || '미션을 완료하세요';
                 return `
                 <div class="mission-card" onclick="openMission('${mission.id}')">
                     <img src="${mission.banner_url}" class="mission-thumbnail" alt="${mission.title}">
@@ -480,7 +481,7 @@
                                 ${mission.title}
                                 <span class="category-badge">${categoryText}</span>
                             </div>
-                            <div class="mission-description">${mission.description}</div>
+                            <div class="mission-description">${description}</div>
                         </div>
                         <div class="mission-footer">
                             <div class="mission-reward-badge">+${mission.cash_reward.toLocaleString()}원</div>
@@ -491,29 +492,8 @@
         }
 
         async function openMission(missionId) {
-            const mission = allMissions.find(m => m.id === missionId);
-            if (!mission) return;
-
-            currentMission = mission;
-            
-            document.getElementById('modalMissionTitle').textContent = currentMission.title;
-            document.getElementById('modalMissionReward').textContent = `+${currentMission.cash_reward.toLocaleString()}원`;
-
-            if (currentMission.category === '10sec') {
-                document.getElementById('modalIcon').textContent = '⏱️';
-                document.getElementById('modalMissionDescription').innerHTML = 
-                    '광고 페이지가 새 탭으로 열립니다.<br>10초 동안 머물러 있으면 즉시 보상이 지급됩니다!';
-            } else if (currentMission.category === 'quiz') {
-                document.getElementById('modalIcon').textContent = '❓';
-                document.getElementById('modalMissionDescription').innerHTML = 
-                    '지금 누른 후 퀴즈를 풀고 "퀴즈 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
-            } else if (currentMission.category === 'install') {
-                document.getElementById('modalIcon').textContent = '📱';
-                document.getElementById('modalMissionDescription').innerHTML = 
-                    '지금 누른 후 앱을 설치하고 "설치 완료"를 눌러주세요.<br>관리자가 확인 후 24시간 안에 보상을 지급합니다.';
-            }
-            
-            document.getElementById('missionModal').classList.add('active');
+            // 미션 페이지로 이동
+            location.href = 'missions.html';
         }
 
         function closeModal() {
