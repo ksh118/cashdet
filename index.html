@@ -33,6 +33,7 @@
             padding: 15px 20px;
             background: #f8f9fa;
             user-select: none;
+            display: block;
         }
         .banner-container {
             display: flex;
@@ -345,12 +346,17 @@
 
         async function loadBanners() {
             try {
+                console.log('배너 로드 시작...');
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/banners?is_active=eq.true&order=created_at.desc`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
+                
+                console.log('배너 응답 상태:', response.status);
                 const banners = await response.json();
+                console.log('로드된 배너 수:', banners.length);
 
-                if (banners.length === 0) {
+                if (!banners || banners.length === 0) {
+                    console.log('배너 없음 - 슬라이더 숨김');
                     document.getElementById('bannerSlider').style.display = 'none';
                     return;
                 }
@@ -358,9 +364,11 @@
                 const container = document.getElementById('bannerContainer');
                 container.innerHTML = banners.map(banner => `
                     <div class="banner-slide">
-                        <img src="${banner.image_url}" class="banner-image" alt="배너">
+                        <img src="${banner.image_url}" class="banner-image" alt="배너" ${banner.link ? `onclick="window.open('${banner.link}', '_blank')" style="cursor: pointer;"` : ''}>
                     </div>
                 `).join('');
+
+                console.log('배너 렌더링 완료');
             } catch (error) {
                 console.error('배너 로드 오류:', error);
                 document.getElementById('bannerSlider').style.display = 'none';
