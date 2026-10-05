@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJI 드론 관리 습관 테스트</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #eef4ff, #f8f9fc);
+  color: #172033;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 25px 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 26px;
+  padding: 30px 22px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.08);
+}
+
+.center {
+  text-align: center;
+  padding: 45px 10px;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+.sub {
+  color: #68738a;
+  line-height: 1.6;
+}
+
+button {
+  cursor: pointer;
+}
+
+.start-btn,
+.result-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 15px;
+  padding: 16px;
+  margin-top: 20px;
+  background: #246bfe;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.progress {
+  height: 7px;
+  background: #e8edf5;
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 20px 0 25px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #246bfe;
+  width: 0%;
+  transition: .3s;
+}
+
+.question-number {
+  color: #246bfe;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.question {
+  font-size: 21px;
+  font-weight: 750;
+  line-height: 1.45;
+  margin: 10px 0 20px;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  margin: 10px 0;
+  border: 1.5px solid #dfe5ef;
+  border-radius: 15px;
+  background: white;
+  font-size: 16px;
+}
+
+.option:hover {
+  background: #edf4ff;
+  border-color: #246bfe;
+}
+
+.option.selected {
+  background: #edf4ff;
+  border-color: #246bfe;
+}
+
+.next-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 15px;
+  padding: 15px;
+  margin-top: 12px;
+  background: #172033;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.next-btn:disabled {
+  opacity: .35;
+}
+
+.hidden {
+  display: none;
+}
+
+.score {
+  font-size: 42px;
+  font-weight: 800;
+  color: #246bfe;
+}
+
+.share-code {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  background: #f2f5fa;
+  padding: 18px;
+  border-radius: 15px;
+  margin: 18px 0;
+}
+
+.info {
+  background: #f6f8fc;
+  padding: 18px;
+  border-radius: 17px;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<!-- 시작 화면 -->
+<section id="startScreen" class="center">
+
+<div style="font-size:60px;">🚁</div>
+
+<h1>DJI 드론 관리 습관 테스트</h1>
+
+<p class="sub">
+다른 DJI 드론 사용자들은<br>
+배터리와 기체를 어떻게 관리하는지 알아보세요.
+</p>
+
+<p class="sub">
+총 10문제 · 객관식
+</p>
+
+<button class="start-btn" onclick="startTest()">
+테스트 시작하기
+</button>
+
+</section>
+
+
+<!-- 테스트 화면 -->
+<section id="quizScreen" class="hidden">
+
+<h1>DJI 관리 습관 테스트</h1>
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="question-number" id="questionNumber"></div>
+
+<div class="question" id="question"></div>
+
+<div id="options"></div>
+
+<button
+class="next-btn"
+id="nextButton"
+onclick="nextQuestion()"
+disabled>
+다음 문제
+</button>
+
+</section>
+
+
+<!-- 결과 화면 -->
+<section id="resultScreen" class="center hidden">
+
+<div style="font-size:55px;">🎉</div>
+
+<h1>테스트 완료!</h1>
+
+<div class="score" id="score"></div>
+
+<h2 id="resultType"></h2>
+
+<div class="info">
+
+<h3>📋 채팅방 공유용 번호</h3>
+
+<div class="share-code" id="shareCode"></div>
+
+<p class="sub">
+위 번호를 복사해서 채팅방에 공유해주세요.
+</p>
+
+<button class="result-btn" onclick="copyCode()">
+번호 복사하기
+</button>
+
+</div>
+
+<button
+class="result-btn"
+onclick="location.reload()">
+다시 테스트하기
+</button>
+
+</section>
+
+</div>
+</div>
+
+
+<script>
+
+const questions = [
+
+{
+question: "드론을 2주 이상 사용하지 않을 예정이라면 배터리를 어떻게 보관하나요?",
+options: [
+"100% 충전 상태",
+"70~80% 정도",
+"40~65% 정도",
+"거의 방전된 상태"
+],
+points: [0,1,3,0]
+},
+
+{
+question: "비행을 마친 직후 뜨거운 배터리는 어떻게 하나요?",
+options: [
+"바로 충전한다",
+"식힌 뒤 충전한다",
+"그냥 보관한다",
+"뜨거운 채 가방에 넣는다"
+],
+points: [0,3,1,0]
+},
+
+{
+question: "비행 전에 배터리를 어떻게 확인하나요?",
+options: [
+"잔량만 확인한다",
+"잔량과 외관을 확인한다",
+"잔량·외관·손상 여부를 확인한다",
+"거의 확인하지 않는다"
+],
+points: [1,2,3,0]
+},
+
+{
+question: "비행 후 가장 먼저 하는 관리는?",
+options: [
+"바로 가방에 넣는다",
+"먼지와 이물질을 확인한다",
+"배터리만 분리한다",
+"특별히 하지 않는다"
+],
+points: [0,3,1,0]
+},
+
+{
+question: "배터리 보관에서 가장 신경 쓰는 것은?",
+options: [
+"100% 충전 상태",
+"서늘하고 건조한 장소",
+"가방에 잘 넣는 것",
+"충전기를 꽂아두는 것"
+],
+points: [1,3,1,0]
+},
+
+{
+question: "배터리가 부풀었거나 외관에 이상이 있다면?",
+options: [
+"일단 사용한다",
+"조심해서 계속 사용한다",
+"사용을 중지하고 공식 안내를 확인한다",
+"충전하면 괜찮다고 생각한다"
+],
+points: [0,0,3,0]
+},
+
+{
+question: "장기간 보관 중인 배터리는 어떻게 관리하나요?",
+options: [
+"전혀 확인하지 않는다",
+"가끔 확인한다",
+"제조사 권장 주기에 따라 확인한다",
+"항상 100%로 유지한다"
+],
+points: [0,2,3,0]
+},
+
+{
+question: "비행 전 프로펠러는 어떻게 확인하나요?",
+options: [
+"확인하지 않는다",
+"눈으로 대충 확인한다",
+"손상·균열·이상 여부를 확인한다",
+"소리가 이상할 때만 확인한다"
+],
+points: [0,1,3,1]
+},
+
+{
+question: "드론을 이동할 때는 어떻게 하나요?",
+options: [
+"그냥 가방에 넣는다",
+"보호되는 케이스를 사용한다",
+"아무렇게나 넣는다",
+"편한 곳에 넣는다"
+],
+points: [0,3,0,1]
+},
+
+{
+question: "비행 후 배터리 잔량이 많이 남아 있다면?",
+options: [
+"다시 100%까지 충전한다",
+"권장 보관 상태를 고려한다",
+"완전히 방전시킨다",
+"며칠 동안 충전기에 꽂아둔다"
+],
+points: [0,3,0,0]
+}
+
+];
+
+
+let currentQuestion = 0;
+let answers = [];
+let totalScore = 0;
+
+
+function startTest() {
+
+document.getElementById("startScreen")
+.classList.add("hidden");
+
+document.getElementById("quizScreen")
+.classList.remove("hidden");
+
+showQuestion();
+
+}
+
+
+function showQuestion() {
+
+const q = questions[currentQuestion];
+
+document.getElementById("questionNumber")
+.innerText =
+"QUESTION " +
+(currentQuestion + 1) +
+" / " +
+questions.length;
+
+document.getElementById("question")
+.innerText = q.question;
+
+document.getElementById("progressBar")
+.style.width =
+((currentQuestion / questions.length) * 100) + "%";
+
+const options =
+document.getElementById("options");
+
+options.innerHTML = "";
+
+document.getElementById("nextButton")
+.disabled = true;
+
+
+q.options.forEach((option, index) => {
+
+const button =
+document.createElement("button");
+
+button.className = "option";
+
+button.innerText =
+(index + 1) + ". " + option;
+
+button.onclick = function() {
+
+document
+.querySelectorAll(".option")
+.forEach(btn =>
+btn.classList.remove("selected")
+);
+
+button.classList.add("selected");
+
+answers[currentQuestion] = index;
+
+document.getElementById("nextButton")
+.disabled = false;
+
+};
+
+options.appendChild(button);
+
+});
+
+}
+
+
+function nextQuestion() {
+
+if (answers[currentQuestion] === undefined) {
+return;
+}
+
+if (currentQuestion < questions.length - 1) {
+
+currentQuestion++;
+
+showQuestion();
+
+} else {
+
+showResult();
+
+}
+
+}
+
+
+function showResult() {
+
+totalScore = 0;
+
+answers.forEach((answer, index) => {
+
+totalScore +=
+questions[index].points[answer];
+
+});
+
+
+document.getElementById("quizScreen")
+.classList.add("hidden");
+
+document.getElementById("resultScreen")
+.classList.remove("hidden");
+
+
+document.getElementById("score")
+.innerText =
+totalScore + " / 30점";
+
+
+let type;
+
+
+if (totalScore >= 25) {
+
+type = "꼼꼼한 관리형 🔋";
+
+} else if (totalScore >= 16) {
+
+type = "기본 관리형 👍";
+
+} else {
+
+type = "간편 관리형 🚁";
+
+}
+
+
+document.getElementById("resultType")
+.innerText = type;
+
+
+/*
+선택한 번호를 그대로 이어 붙임.
+예:
+1번 → 3번 → 2번 → 4번
+= 1324
+*/
+
+const code =
+answers.map(answer => answer + 1).join("");
+
+document.getElementById("shareCode")
+.innerText = code;
+
+window.shareCode = code;
+
+}
+
+
+function copyCode() {
+
+const code = window.shareCode;
+
+if (!code) return;
+
+
+if (navigator.clipboard) {
+
+navigator.clipboard
+.writeText(code)
+.then(() => {
+
+alert(
+"번호가 복사됐어요!\n\n" +
+code +
+"\n\n채팅방에 붙여넣어 주세요."
+);
+
+});
+
+} else {
+
+const textarea =
+document.createElement("textarea");
+
+textarea.value = code;
+
+document.body.appendChild(textarea);
+
+textarea.select();
+
+document.execCommand("copy");
+
+textarea.remove();
+
+alert(
+"번호가 복사됐어요!\n\n" +
+code +
+"\n\n채팅방에 붙여넣어 주세요."
+);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
